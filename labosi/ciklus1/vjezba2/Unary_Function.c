@@ -8,9 +8,7 @@
 #include <malloc.h>
 
 
-FUNCPTR _Unary_Function__function_table[3] = {
-        NULL, NULL, (FUNCPTR) &_Unary_Function__negative_value_at
-};
+FUNCPTR _Unary_Function__function_table[3] = {NULL, NULL, (FUNCPTR) _Unary_Function__negative_value_at};
 
 /*constructor*/Unary_Function *Unary_Function__Create(int lb, int ub) {
     Unary_Function *newUF = (Unary_Function *) malloc(sizeof(Unary_Function));
@@ -22,16 +20,16 @@ FUNCPTR _Unary_Function__function_table[3] = {
 }
 
 /*virtual destructor*/void Unary_Function__Delete(Unary_Function *obj_ptr) {
-    (*((void (*)(Unary_Function *)) *(obj_ptr->function_table[_UNARY_FUNCTION__FUN_IDX__DELETE])))(obj_ptr);
+    (((void (*)(Unary_Function *)) (obj_ptr->function_table[_UNARY_FUNCTION__FUN_IDX__DELETE])))(obj_ptr);
     free(obj_ptr);
 }
 
 /*virtual*/double Unary_Function__value_at(Unary_Function *obj_ptr, double x) {
-    return (*((double (*)(Unary_Function *, double)) (obj_ptr->function_table[_UNARY_FUNCTION__FUN_IDX__VALUE_AT])))(obj_ptr, x);
+    return (((double (*)(Unary_Function *, double)) (obj_ptr->function_table[_UNARY_FUNCTION__FUN_IDX__VALUE_AT])))(obj_ptr, x);
 }
 
 /*virtual*/double Unary_Function__negative_value_at(Unary_Function *obj_ptr, double x) {
-    return (*((double (*)(Unary_Function *, double)) (obj_ptr->function_table[_UNARY_FUNCTION__FUN_IDX__NEGATIVE_VALUE_AT])))(obj_ptr, x);
+    return (((double (*)(Unary_Function *, double)) (obj_ptr->function_table[_UNARY_FUNCTION__FUN_IDX__NEGATIVE_VALUE_AT])))(obj_ptr, x);
 }
 
 /*final*/double _Unary_Function__negative_value_at(Unary_Function *obj_ptr, double x) {

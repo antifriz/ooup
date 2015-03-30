@@ -16,7 +16,7 @@ typedef struct {
 
 /*constructor*/Unary_Function *Unary_Function__Create(int lb, int ub);
 
-#define _UNARY_FUNCTION__FUN_IDX__DELETE 1
+#define _UNARY_FUNCTION__FUN_IDX__DELETE 0
 
 /*virtual destructor*/void Unary_Function__Delete(Unary_Function *obj_ptr);
 

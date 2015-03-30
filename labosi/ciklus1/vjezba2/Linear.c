@@ -19,9 +19,7 @@ typedef struct {
     return der_ptr->a * x + der_ptr->b;
 }
 
-FUNCPTR _Linear__function_table[3] = {
-        &_Linear__Delete, (FUNCPTR) &_Linear__value_at, (FUNCPTR) &_Unary_Function__negative_value_at
-};
+FUNCPTR _Linear__function_table[3] = {_Linear__Delete, (FUNCPTR) _Linear__value_at, (FUNCPTR) _Unary_Function__negative_value_at};
 
 /*constructor*/Unary_Function *Linear__Create(int lb, int ub, double a_coef, double b_coef) {
     Unary_Function *newUF = Unary_Function__Create(lb, ub);

@@ -2,28 +2,44 @@
 // Created by ivan on 3/22/15.
 //
 
-#include <iostream>
+class Base {
+public:
+    //if in doubt, google "pure virtual"
+    virtual void set(int x) = 0;
 
-class CoolClass{
-public:
-    virtual void set(int x){x_=x;};
-    virtual int get(){return x_;};
-    int x_;
-    int y_;
+    virtual int get() = 0;
 };
-class PlainOldClass{
+
+class CoolClass : public Base {
 public:
-    void set(int x){x_=x;};
-    int get(){return x_;};
+    virtual void set(int x) {
+        x_ = x;
+    };
+
+    virtual int get() {
+        return x_;
+    };
 private:
     int x_;
 };
 
-int main()
-{
-    using namespace std;
-    CoolClass c;
-    cout<<&(c.x_)<<" "<<&(c.y_)<<" "<<&(c)<<" "<<endl;
-    cout<<sizeof(PlainOldClass)<<endl;
+class PlainOldClass {
+public:
+    void set(int x) {
+        x_ = x;
+    };
+
+    int get() {
+        return x_;
+    };
+private:
+    int x_;
+};
+
+int main() {
+    PlainOldClass *poc = new PlainOldClass;
+    Base *pb = new CoolClass;
+    poc->set(42);
+    pb->set(42);
     return 0;
 }

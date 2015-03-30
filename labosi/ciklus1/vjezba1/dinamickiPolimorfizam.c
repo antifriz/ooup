@@ -32,8 +32,8 @@ char const *catMenu(void) {
 #define IDX_FUN_MENU 1
 #define IDX_FUN_CNT 2
 
-PTRFUN dogFuncts[IDX_FUN_CNT] = {&dogGreet, &dogMenu};
-PTRFUN catFuncts[IDX_FUN_CNT] = {&catGreet, &catMenu};
+PTRFUN dogFuncts[IDX_FUN_CNT] = {dogGreet, dogMenu};
+PTRFUN catFuncts[IDX_FUN_CNT] = {catGreet, catMenu};
 
 
 void animalPrintGreeting(struct Animal *animalPtr) {

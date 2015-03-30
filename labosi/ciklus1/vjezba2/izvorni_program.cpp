@@ -51,7 +51,8 @@ private:
     double a;
     double b;
 public:
-    Linear(int lb, int ub, double a_coef, double b_coef) : Unary_Function(lb, ub), a(a_coef), b(b_coef) {
+    Linear(int lb, int ub, double a_coef, double b_coef)
+            : Unary_Function(lb, ub), a(a_coef), b(b_coef) {
     };
 
     virtual double value_at(double x) {

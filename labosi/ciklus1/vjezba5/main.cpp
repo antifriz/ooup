@@ -2,22 +2,37 @@
 // Created by ivan on 3/22/15.
 //
 
-class Base{
+#include <stdio.h>
+
+class Base {
 public:
-    //if in doubt, google "pure virtual"
-    virtual void set(int x)=0;
-    virtual int get()=0;
+    Base() {
+        metoda();
+    }
+
+    virtual void virtualnaMetoda() {
+        printf("ja sam bazna implementacija!\n");
+    }
+
+    void metoda() {
+        printf("Metoda kaze: ");
+        virtualnaMetoda();
+    }
 };
-class CoolClass: public Base{
+
+class Derived : public Base {
 public:
-    virtual void set(int x){x_=x;};
-    virtual int get(){return x_;};
-private:
-    int x_;
+    Derived() : Base() {
+        metoda();
+    }
+
+    virtual void virtualnaMetoda() {
+        printf("ja sam izvedena implementacija!\n");
+    }
 };
-int main(){
-    PlainOldClass* poc=new PlainOldClass;
-    Base* pb=new CoolClass;
-    poc->set(42);
-    pb->set(42);
+
+int main() {
+    Derived *pd = new Derived();
+    pd->metoda();
+    return 0;
 }
