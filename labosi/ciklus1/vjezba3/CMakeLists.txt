@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8)
-project(ooup.labosi.ciklus1.vjezba3)
+project(c1v3)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 
-add_executable(vjezba3.memorijska_cijena main.cpp)
+add_executable(${PROJECT_NAME}.memorijska_cijena main.cpp)

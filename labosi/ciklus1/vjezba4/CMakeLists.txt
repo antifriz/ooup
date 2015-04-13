@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8)
-project(ooup.labosi.ciklus1.vjezba4)
+project(c1v4)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 
-add_executable(vjezba4.vremenska_cijena main.cpp)
+add_executable(${PROJECT_NAME}.vremenska_cijena main.cpp)
