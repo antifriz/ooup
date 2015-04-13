@@ -1,10 +1,38 @@
 //
 // Created by ivan on 4/13/15.
 //
-
+#include <vector>
 #include "determinator_interpolated.h"
 
 double DeterminatorInterpolated::getPercentile(const Sequence &sequence, int percentile) const {
+
+/*
+    std::vector<double> percentils;
+
+    double previous = 0;
+    double next = 0;
+    double vk0 = 0;
+
+    double vk1 = 0;
+
+
+    for (size_t i = 0; i < sequence.size(); ++i) {
+        percentils.push_back(100 * (i - 0.5) / sequence.size());
+        if (percentils.size() > 1 && percentile >= percentils.at(percentils.size() - 2) &&
+            percentile < percentils.at(percentils.size() - 1)) {
+            previous = percentils.at(percentils.size() - 2);
+            next = percentils.at(percentils.size() - 1);
+            vk0 = sequence.at(i - 1);
+            vk1 = sequence.at(i);
+        }
+    }
+
+    if (percentile <= percentils.front()) return sequence.front();
+    if (percentile >= percentils.back()) return sequence.back();
+
+    return vk0 + (percentile - previous) * (vk1 - vk0) / (next - previous);
+*/
+
     size_t size = sequence.size();
     double coeff = 100.0 / size;
 

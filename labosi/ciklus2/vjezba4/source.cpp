@@ -19,12 +19,12 @@ void testSequentialInterpolated() {
 }
 
 void testRandomElement() {
-    DistributionTester tester(GeneratorRandom(20, 20, 20), DeterminatorElement());
+    DistributionTester tester(GeneratorRandom(20, 20, 10000), DeterminatorElement());
     tester.printPercentiles();
 }
 
 void testRandomInterpolated() {
-    DistributionTester tester(GeneratorRandom(20, 20, 20), DeterminatorInterpolated());
+    DistributionTester tester(GeneratorRandom(20, 20, 10000), DeterminatorInterpolated());
     tester.printPercentiles();
 }
 
