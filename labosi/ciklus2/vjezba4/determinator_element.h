@@ -5,7 +5,6 @@
 #ifndef PROJECT_DETERMINATOR_ELEMENT_H
 #define PROJECT_DETERMINATOR_ELEMENT_H
 
-#include <glob.h>
 #include "determinator.h"
 
 class DeterminatorElement : public Determinator {

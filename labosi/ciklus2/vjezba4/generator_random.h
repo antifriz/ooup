@@ -5,8 +5,6 @@
 #ifndef PROJECT_GENERATOR_RANDOM_H
 #define PROJECT_GENERATOR_RANDOM_H
 
-#include <random>
-#include <algorithm>
 #include "generator.h"
 
 class GeneratorRandom : public Generator {

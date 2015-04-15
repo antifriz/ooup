@@ -1,7 +1,7 @@
 //
 // Created by ivan on 4/13/15.
 //
-
+#include <iostream>
 #include "distribution_tester.h"
 
 double DistributionTester::getPercentile(int percentile) const {

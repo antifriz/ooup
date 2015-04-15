@@ -6,7 +6,6 @@
 #define PROJECT_GENERATOR_SEQUENTIAL_H
 
 
-#include <vector>
 #include "determinator.h"
 #include "generator.h"
 

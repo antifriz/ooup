@@ -2,6 +2,7 @@
 // Created by ivan on 4/13/15.
 //
 
+#include <glob.h>
 #include "determinator_element.h"
 
 double DeterminatorElement::getPercentile(const Sequence &sequence, int percentile) const {

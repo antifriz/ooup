@@ -5,8 +5,6 @@
 #ifndef PROJECT_DETERMINATOR_INTERPOLATED_H
 #define PROJECT_DETERMINATOR_INTERPOLATED_H
 
-#include <glob.h>
-#include <math.h>
 #include "determinator.h"
 
 class DeterminatorInterpolated : public Determinator {

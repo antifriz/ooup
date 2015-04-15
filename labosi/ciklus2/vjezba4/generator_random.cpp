@@ -2,6 +2,8 @@
 // Created by ivan on 4/13/15.
 //
 
+#include <random>
+#include <algorithm>
 #include "generator_random.h"
 
 GeneratorRandom::GeneratorRandom(double mean, double std, int n) {

@@ -5,11 +5,6 @@
 #ifndef PROJECT_DISTRIBUTION_TESTER_H
 #define PROJECT_DISTRIBUTION_TESTER_H
 
-#include <vector>
-#include <random>
-#include <algorithm>
-#include <iostream>
-
 #include "determinator.h"
 #include "generator.h"
 
