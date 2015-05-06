@@ -8,4 +8,4 @@ public :
     virtual int solve() = 0;
 };
 
-#endif
+#endif //_BASE_CLASS

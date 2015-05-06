@@ -7,7 +7,7 @@
 
 #include "mydbase.h"
 
-class MyDBaseRaw : public MyDBase {
+class MyDBaseConcrete : public MyDBase {
 public:
     virtual int query(const Param &p) {
         auto r = ((double) rand() / (RAND_MAX));

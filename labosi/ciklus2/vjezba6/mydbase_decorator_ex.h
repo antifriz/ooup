@@ -10,10 +10,10 @@
 class MyDBaseDecoratorEx : public MyDBaseDecorator {
 public:
 
-    MyDBaseDecoratorEx(MyDBase &worker) : MyDBaseDecorator(worker) { }
+    MyDBaseDecoratorEx(MyDBase &component) : MyDBaseDecorator(component) { }
 
     virtual int query(const Param &p) {
-        int status = worker.query(p);
+        int status = component.query(p);
         if (status < 0) throw status;
         return status;
     }

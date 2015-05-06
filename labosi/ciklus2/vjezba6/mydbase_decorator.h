@@ -9,9 +9,9 @@
 
 class MyDBaseDecorator : public MyDBase {
 protected:
-    MyDBase &worker;
+    MyDBase &component;
 public:
-    MyDBaseDecorator(MyDBase &worker) : worker(worker) { }
+    MyDBaseDecorator(MyDBase &component) : component(component) { }
 };
 
 

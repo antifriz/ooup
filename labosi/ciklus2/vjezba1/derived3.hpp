@@ -2,5 +2,5 @@
 
 class Derived3 : public Base {
 public:
-    virtual int solve() { return 42 / 2; }
+    virtual int solve() { return 42 >> 1; }
 };

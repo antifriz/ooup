@@ -10,14 +10,14 @@
 
 class MyDBaseDecoratorLog : public MyDBaseDecorator {
 public:
-    MyDBaseDecoratorLog(MyDBase &worker) : MyDBaseDecorator(worker) { }
+    MyDBaseDecoratorLog(MyDBase &component) : MyDBaseDecorator(component) { }
 
     virtual int query(const Param &p) {
         std::ofstream file;
         file.open("mybase.log", std::ios_base::app | std::ios_base::out);
         file << "query: " << p.column << " " << p.key << " " << p.table << std::endl;
         file.close();
-        return worker.query(p);
+        return component.query(p);
     }
 };
 

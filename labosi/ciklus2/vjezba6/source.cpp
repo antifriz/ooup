@@ -5,18 +5,18 @@
 #include "mydbase.h"
 #include "mydbase_decorator_ex.h"
 #include "mydbase_decorator_log.h"
-#include "mydbase_raw.h"
+#include "mydbase_concrete.h"
 
 int main() {
     srand((unsigned int) time(nullptr));
 
     MyDBase::Param param;
-    param.key = "pohana";
-    param.column = "je";
-    param.table = "malina";
+    param.key = "bla";
+    param.column = "blah";
+    param.table = "blahblah";
 
 
-    MyDBaseRaw raw;
+    MyDBaseConcrete raw;
 
     //std::cout<<raw.query(param)<<std::endl;
 

@@ -5,10 +5,10 @@
 #ifndef PROJECT_CLIENT1_HPP
 #define PROJECT_CLIENT1_HPP
 
-#include "abstractDatabase.h"
+#include "mockDatabase.h"
 
 class Client1 {
-    ConcreteDatabase myDatabase;
+    MockDatabase myDatabase;
     public:
     void transaction() {
         myDatabase.getData();
