@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#include "point.h"
 
 class Point {
 private:

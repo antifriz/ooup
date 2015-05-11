@@ -1,5 +1,6 @@
 #include <iostream>
 #include <assert.h>
+#include "point.h"
 
 struct Point {
     int x;
