@@ -154,7 +154,7 @@ public class TextEditorModel {
 
     private void appendToSelection(Location last) {
         if (selectionRange == null)
-            selectionRange = new LocationRange(last, cursorLocation);
+            selectionRange = new LocationRange(last, cursorLocation.copy());
         else {
             selectionRange = new LocationRange(selectionRange.getFrom(), cursorLocation);
             if (selectionRange.getFrom().equals(selectionRange.getTo())) {
@@ -257,22 +257,21 @@ public class TextEditorModel {
 
         boolean oneLiner = r.getFrom().getY() == r.getTo().getY();
 
-        cursorLocation.setX(r.getFrom().getX());
-        cursorLocation.setY(r.getFrom().getY());
+        cursorLocation = r.getLower().copy();
         notifyCursorObservers();
 
         if (oneLiner) {
-            lines.get(r.getFrom().getY()).delete(r.getFrom().getX(), r.getTo().getX());
+            lines.get(r.getLower().getY()).delete(r.getLower().getX(), r.getHigher().getX());
         } else {
-            lines.get(r.getFrom().getY()).delete(r.getFrom().getY(), lines.get(r.getFrom().getY()).length());
+            lines.get(r.getLower().getY()).delete(r.getLower().getX(), lines.get(r.getLower().getY()).length());
 
-            Iterator<StringBuffer> it = linesRange(r.getFrom().getY() + 1, r.getTo().getY());
+            Iterator<StringBuffer> it = linesRange(r.getLower().getY() + 1, r.getHigher().getY());
             while (it.hasNext())
                 it.remove();
 
-            lines.get(r.getFrom().getY() + 1).delete(0, r.getTo().getX());
-            lines.get(r.getFrom().getY()).append(lines.get(r.getFrom().getY() + 1));
-            lines.remove(r.getFrom().getY() + 1);
+            lines.get(r.getLower().getY() + 1).delete(0, r.getHigher().getX());
+            lines.get(r.getLower().getY()).append(lines.get(r.getLower().getY() + 1));
+            lines.remove(r.getLower().getY() + 1);
 
         }
         clearSelection();
