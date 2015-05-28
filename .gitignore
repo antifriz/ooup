@@ -26,3 +26,9 @@
 *.exe
 *.out
 *.app
+
+
+# IntelliJ project files
+.idea
+out
+gen
