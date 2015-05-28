@@ -51,8 +51,6 @@ public class TextEditor extends JComponent implements KeyListener {
     @Override
     protected void processKeyEvent(KeyEvent e) {
         System.out.println("EUREKA");
-        System.out.println(e.getKeyChar());
-
     }
 
     @Override
@@ -69,7 +67,6 @@ public class TextEditor extends JComponent implements KeyListener {
 
         int textHeight = g.getFontMetrics().getHeight();
         if (getTextEditorModel().isSelectedModeActive()) {
-            System.out.println("jej");
 
             LocationRange selection = getTextEditorModel().getSelectionRange();
             {
@@ -129,7 +126,6 @@ public class TextEditor extends JComponent implements KeyListener {
             while (it.hasNext()) {
                 yOffset += textHeight;
                 String str = it.next().toString();
-                System.out.println(str);
                 g.drawString(str, 0, yOffset);
             }
         }
@@ -143,7 +139,7 @@ public class TextEditor extends JComponent implements KeyListener {
         int pixelsBefore = g.getFontMetrics().charsWidth(line.toString().toCharArray(), 0, lowerLimit);
         int pixelsSelection = g.getFontMetrics().charsWidth(line.toString().toCharArray(), lowerLimit, upperLimit - lowerLimit);
         g.setColor(SELECTION_BG_COLOR);
-        g.fillRect(pixelsBefore, yOffset - textHeight, pixelsSelection, textHeight);
+        g.fillRect(pixelsBefore, yOffset - textHeight, pixelsSelection, textHeight+g.getFontMetrics().getMaxDescent());
 
         g.setColor(SELECTION_TXT_COLOR);
         g.drawString(line.substring(lowerLimit, upperLimit), pixelsBefore, yOffset);
@@ -160,7 +156,7 @@ public class TextEditor extends JComponent implements KeyListener {
         int screenX = g.getFontMetrics().charsWidth(line, 0, cursorLocation.getX());
         int screenY = textHeight * cursorLocation.getY();
         g.setColor(Color.RED);
-        g.drawRect(screenX, screenY/*+g.getFontMetrics().getMaxDescent()*/, CURSOR_THICKNESS, textHeight);
+        g.drawRect(screenX, screenY, CURSOR_THICKNESS, textHeight+g.getFontMetrics().getMaxDescent());
     }
 
 
@@ -185,14 +181,26 @@ public class TextEditor extends JComponent implements KeyListener {
             case KeyEvent.VK_RIGHT:
                 getTextEditorModel().moveCursorRight(e.isShiftDown());
                 break;
+            case KeyEvent.VK_BACK_SPACE:
+                if(getTextEditorModel().isSelectedModeActive())
+                    getTextEditorModel().deleteRange(getTextEditorModel().getSelectionRange());
+                else
+                    getTextEditorModel().deleteBefore();
+                break;
+            case KeyEvent.VK_DELETE:
+                if(getTextEditorModel().isSelectedModeActive())
+                    getTextEditorModel().deleteRange(getTextEditorModel().getSelectionRange());
+                else
+                    getTextEditorModel().deleteAfter();
+                break;
             default:
                 break;
         }
-        if (getTextEditorModel().isSelectedModeActive()) {
+/*        if (getTextEditorModel().isSelectedModeActive()) {
             System.out.println(getTextEditorModel().getSelectionRange().getLower());
             System.out.println(getTextEditorModel().getSelectionRange().getHigher());
             System.out.println();
-        }
+        }*/
     }
 
 

@@ -225,15 +225,19 @@ public class TextEditorModel {
     }
 
     public void deleteBefore() {
-        if (cursorLocation.getX() == 0) {
-            if (cursorLocation.getY() == 0)
+        if (cursorLocation.getX() == 0 && cursorLocation.getY() == 0)
                 return;
-            lines.get(cursorLocation.getY() - 1).append(lines.get(cursorLocation.getY()));
-            lines.remove(cursorLocation.getY());
-        } else {
-            lines.get(cursorLocation.getY()).deleteCharAt(cursorLocation.getX() - 1);
-        }
+
+        Location lastLocation = cursorLocation.copy();
         moveCursorLeft(false);
+        if (lastLocation.getX() == 0) {
+            if (lastLocation.getY() == 0)
+                return;
+            lines.get(lastLocation.getY() - 1).append(lines.get(lastLocation.getY()));
+            lines.remove(lastLocation.getY());
+        } else {
+            lines.get(lastLocation.getY()).deleteCharAt(lastLocation.getX() - 1);
+        }
         notifyTextObservers();
     }
 
