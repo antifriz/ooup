@@ -4,12 +4,14 @@ import hr.fer.zemris.ooup.lab3.helpers.Location;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.util.Iterator;
 
 /**
  * Created by ivan on 5/28/15.
  */
-public class TextEditor extends JComponent {
+public class TextEditor extends JComponent implements KeyListener {
     private TextEditorModel textEditorModel;
 
     protected static final int  CURSOR_THICKNESS = 0;
@@ -20,6 +22,19 @@ public class TextEditor extends JComponent {
 
     public TextEditor(TextEditorModel textEditorModel) {
         this.textEditorModel = textEditorModel;
+
+        textEditorModel.attachCursorObserver(new CursorObserver() {
+            @Override
+            public void updateCursorLocation(Location loc) {
+                TextEditor.this.repaint();
+            }
+        });
+    }
+
+
+    @Override
+    protected void processKeyEvent(KeyEvent e) {
+        System.out.println("EUREKA");
     }
 
     @Override
@@ -51,5 +66,33 @@ public class TextEditor extends JComponent {
     }
 
 
+    @Override
+    public void keyTyped(KeyEvent keyEvent) {
 
+    }
+
+    @Override
+    public void keyPressed(KeyEvent e) {
+        switch(e.getKeyCode()) {
+            case KeyEvent.VK_UP:
+                getTextEditorModel().moveCursorUp();
+                break;
+            case KeyEvent.VK_DOWN:
+                getTextEditorModel().moveCursorDown();
+                break;
+            case KeyEvent.VK_LEFT:
+                getTextEditorModel().moveCursorLeft();
+                break;
+            case KeyEvent.VK_RIGHT:
+                getTextEditorModel().moveCursorRight();
+                break;
+            default:
+                break;
+        }
+    }
+
+    @Override
+    public void keyReleased(KeyEvent keyEvent) {
+
+    }
 }

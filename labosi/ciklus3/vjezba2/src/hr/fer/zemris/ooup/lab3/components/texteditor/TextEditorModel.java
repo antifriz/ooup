@@ -3,6 +3,7 @@ package hr.fer.zemris.ooup.lab3.components.texteditor;
 import hr.fer.zemris.ooup.lab3.helpers.Location;
 import hr.fer.zemris.ooup.lab3.helpers.LocationRange;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
@@ -22,6 +23,7 @@ public class TextEditorModel {
         this.lines = Arrays.asList(lines.split(System.lineSeparator()));
         this.cursorLocation = new Location(0, 0);
         this.selectionRange = null;
+        this.observers = new ArrayList<CursorObserver>();
     }
 
     public void attachCursorObserver(CursorObserver observer){
@@ -47,25 +49,29 @@ public class TextEditorModel {
 
     public void moveCursorUp(){
         int y = cursorLocation.getY();
+        int x = cursorLocation.getX();
         if(y >0)
         {
             cursorLocation.setY(y-1);
+            cursorLocation.setX(Math.min(x,lines.get(cursorLocation.getY()).length()));
             notifyCursorObservers();
         }
     }
     public void moveCursorDown(){
 
         int y = cursorLocation.getY();
-        if(y >0)
+        int x = cursorLocation.getX();
+        if(y +1<lines.size())
         {
-            cursorLocation.setY(y+1);
+            cursorLocation.setY(y + 1);
+            cursorLocation.setX(Math.min(x,lines.get(cursorLocation.getY()).length()));
             notifyCursorObservers();
         }
     }
     public void moveCursorLeft(){
 
         int x = cursorLocation.getX();
-        if(x <lines.size())
+        if(x>0)
         {
             cursorLocation.setX(x - 1);
             notifyCursorObservers();

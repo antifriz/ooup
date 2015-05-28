@@ -22,7 +22,6 @@ public class Main {
                     FunkyFrame frame = new FunkyFrame();
                     frame.setBounds(100, 100, 500, 400);
                     frame.setVisible(true);
-                    fillFrame(frame);
                 }
                 catch (Exception e){
                     e.printStackTrace();
@@ -31,12 +30,6 @@ public class Main {
         });
     }
 
-    private static void fillFrame(FunkyFrame frame) {
-        TextEditorModel tem = new TextEditorModel("Burek s mesom.\nJos jedan burek s mesom.\nGle, sirnica!");
-
-        TextEditor textEditor = new TextEditor(tem);
-        frame.add(textEditor);
-    }
 
 
 }
