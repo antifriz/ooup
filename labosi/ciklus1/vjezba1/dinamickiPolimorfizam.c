@@ -5,8 +5,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-typedef char const *(*PTRFUN)();
-
 struct Animal {
     PTRFUN *functionTable;
     char *animalName;
@@ -28,8 +26,6 @@ char const *catMenu(void) {
     return "konzerviranu tunjevinu";
 }
 
-#define IDX_FUN_GREET 0
-#define IDX_FUN_MENU 1
 #define IDX_FUN_CNT 2
 
 PTRFUN dogFuncts[IDX_FUN_CNT] = {dogGreet, dogMenu};
