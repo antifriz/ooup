@@ -193,21 +193,25 @@ public class TextEditorModel {
 
     public Iterator<StringBuffer> linesRange(final int index1, final int index2) {
         return new Iterator<StringBuffer>() {
-            int i = index1;
+            int i1 = index1;
+            int i2 = index2;
 
             @Override
             public boolean hasNext() {
-                return i < index2 && i < lines.size();
+                return i1 < i2 && i1 < lines.size();
             }
 
             @Override
             public StringBuffer next() {
-                return lines.get(i++);
+                assert hasNext();
+                return lines.get(i1++);
             }
 
             @Override
             public void remove() {
-                lines.remove(i);
+                assert hasNext();
+                lines.remove(i1);
+                i2--;
             }
         };
     }
@@ -260,27 +264,30 @@ public class TextEditorModel {
 
         setCursorLocation(r.getLower().copy());
 
-        if (oneLiner) {
-            lines.get(r.getLower().getY()).delete(r.getLower().getX(), r.getHigher().getX());
-        } else {
-            lines.get(r.getLower().getY()).delete(r.getLower().getX(), lines.get(r.getLower().getY()).length());
+        int ly = r.getLower().getY();
+        int lx = r.getLower().getX();
+        int hx = r.getHigher().getX();
 
-            Iterator<StringBuffer> it = linesRange(r.getLower().getY() + 1, r.getHigher().getY());
-            while (it.hasNext())
-                it.remove();
+        if (oneLiner) lines.get(ly).delete(lx, hx);
+        else {
+            lines.get(ly).delete(lx, lines.get(ly).length());
+            int hy = r.getHigher().getY();
 
-            lines.get(r.getLower().getY() + 1).delete(0, r.getHigher().getX());
-            lines.get(r.getLower().getY()).append(lines.get(r.getLower().getY() + 1));
-            lines.remove(r.getLower().getY() + 1);
+            Iterator<StringBuffer> it = linesRange(ly + 1, hy);
+            while (it.hasNext()) it.remove();
 
+            StringBuffer nextLine = lines.get(ly + 1);
+            nextLine.delete(0, hx);
+            lines.get(ly).append(nextLine);
+            lines.remove(ly + 1);
         }
         clearSelection();
 
         notifyTextObservers();
     }
 
-    public void deleteSelection(){
-        if(isSelectedModeActive())
+    public void deleteSelection() {
+        if (isSelectedModeActive())
             deleteRange(selectionRange);
     }
 
@@ -291,7 +298,14 @@ public class TextEditorModel {
         notifyTextObservers();
     }
 
+    public void insert(String str){
+        for(char c: str.toCharArray())
+            insert(c);
+    }
+
     public void insert(char c) {
+        deleteSelection();
+
         if (c == '\r') return;
         if (c == '\n') {
             StringBuffer line = lines.get(cursorLocation.getY());
