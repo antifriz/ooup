@@ -45,10 +45,6 @@ public class TextEditorModel {
         return cursorLocation;
     }
 
-    public void setCursorLocation(Location cursorLocation) {
-        this.cursorLocation = cursorLocation;
-        notifyCursorObservers();
-    }
 
     public void attach(CursorObserver observer) {
         cursorObservers.add(observer);
@@ -61,6 +57,11 @@ public class TextEditorModel {
     public void notifyCursorObservers() {
         for (CursorObserver observer : cursorObservers)
             observer.updateCursorLocation(cursorLocation);
+    }
+
+    public void setCursorLocation(Location cursorLocation) {
+        this.cursorLocation = cursorLocation;
+        notifyCursorObservers();
     }
 
     public void moveCursorUp(boolean selectMode) {
@@ -87,45 +88,49 @@ public class TextEditorModel {
 
     public void moveCursorLeft(boolean selectMode) {
         Location lastLocation = cursorLocation.copy();
-
-        if (cursorLocation.getX() == 0) {
-            if (cursorLocation.getY() == 0)
-                return;
-            cursorLocation.decY();
-            cursorLocation.setX(lineLength(cursorLocation.getY()));
-        } else {
-            cursorLocation.decX();
-        }
-
+        Location nextLocation = getLeftLocation(cursorLocation);
+        if(nextLocation == null) return;
+        cursorLocation = nextLocation;
         processCursorMove(selectMode, lastLocation);
     }
 
     public void moveCursorRight(boolean selectMode) {
         Location lastLocation = cursorLocation.copy();
-
-        if (cursorLocation.getX() >= lineLength(cursorLocation.getY())) {
-            if (cursorLocation.getY() + 1 >= lines.size())
-                return;
-            cursorLocation.incY();
-            cursorLocation.setX(0);
-        }
-        cursorLocation.incX();
-
+        Location nextLocation = getRightLocation(cursorLocation);
+        if(nextLocation == null) return;
+        cursorLocation = nextLocation;
         processCursorMove(selectMode, lastLocation);
     }
 
-    public void correctCursorAndNotify() {
-        int hash = cursorLocation.hashCode();
+    public Location getLeftLocation(Location location) {
+        Location lastLocation = location.copy();
 
-        cursorLocation.setY(Math.max(cursorLocation.getY(), 0));
-        cursorLocation.setY(Math.min(cursorLocation.getY(), lines.size() - 1));
+        if (lastLocation.getX() == 0) {
+            if (lastLocation.getY() == 0)
+                return null;
+            lastLocation.decY();
+            lastLocation.setX(lineLength(lastLocation.getY()));
+        } else {
+            lastLocation.decX();
+        }
 
-        cursorLocation.setX(Math.max(cursorLocation.getX(), 0));
-        cursorLocation.setX(Math.min(cursorLocation.getX(), lines.get(cursorLocation.getY()).length()));
-
-        if (cursorLocation.hashCode() != hash)
-            notifyCursorObservers();
+        return lastLocation;
     }
+
+    public Location getRightLocation(Location location) {
+        Location lastLocation = location.copy();
+
+        if (lastLocation.getX() >= lineLength(lastLocation.getY())) {
+            if (lastLocation.getY() + 1 >= lines.size())
+                return null;
+            lastLocation.incY();
+            lastLocation.setX(0);
+        }
+        lastLocation.incX();
+
+        return lastLocation;
+    }
+
 
     public boolean isSelectedModeActive() {
         return selectionRange != null;
@@ -136,10 +141,10 @@ public class TextEditorModel {
         return selectionRange;
     }
 
-    public void setSelectionRange(LocationRange r) {
+   /* public void setSelectionRange(LocationRange r) {
         selectionRange = r;
     }
-
+*/
     public void processCursorMove(boolean isSelectMode, Location last) {
         if (isSelectMode) {
             appendToSelection(last);
@@ -233,73 +238,83 @@ public class TextEditorModel {
             observer.updateText();
     }
 
-    public void deleteBefore() {
-        if (cursorLocation.getX() == 0 && cursorLocation.getY() == 0)
-            return;
+    public Character deleteBefore(Location location) {
+        Location locationBefore = getLeftLocation(location);
+        if (locationBefore == null)
+            return null;
+        return deleteAfter(locationBefore);
+    }
 
-        final String deleted;
+    public Character deleteAfter(Location location) {
+        final char deleted;
 
-        Location lastLocation = cursorLocation.copy();
-        moveCursorLeft(false);
-        if (lastLocation.getX() == 0) {
-            if (lastLocation.getY() == 0)
-                return;
-            lines.get(lastLocation.getY() - 1).append(lines.get(lastLocation.getY()));
-            lines.remove(lastLocation.getY());
-            deleted = System.lineSeparator();
+        if (location.getX() == lineLength(location.getY())) {
+            if (location.getY() == lines.size() - 1)
+                return null;
+            lines.get(location.getY()).append(lines.get(location.getY() + 1));
+            deleted = '\n';
+            lines.remove(location.getY() + 1);
         } else {
-            deleted = "" + lines.get(lastLocation.getY()).charAt(lastLocation.getX() - 1);
-            lines.get(lastLocation.getY()).deleteCharAt(lastLocation.getX() - 1);
+            deleted = lines.get(location.getY()).charAt(location.getX());
+            lines.get(location.getY()).deleteCharAt(location.getX());
         }
+        return deleted;
+    }
 
-        undoManager.push(new EditAction() {
-            String deletedString = deleted;
-            @Override
-            public void executeDo() {
-                TextEditorModel.this.deleteBefore();
-            }
+    public void deleteBefore() {
+        if (getLeftLocation(cursorLocation) != null) {
+            EditAction ea = new EditAction() {
+                Location beforeLocation = cursorLocation.copy();
+                Location afterLocation;
+                Character c;
 
-            @Override
-            public void executeUndo() {
-                TextEditorModel.this.insert(deletedString);
-            }
-        });
+                @Override
+                public void executeDo() {
+                    c = deleteBefore(beforeLocation);
+                    afterLocation = TextEditorModel.this.getLeftLocation(afterLocation);
+                    TextEditorModel.this.notifyTextObservers();
+                    TextEditorModel.this.setCursorLocation(afterLocation);
+                }
 
-        notifyTextObservers();
+                @Override
+                public void executeUndo() {
+                    TextEditorModel.this.insert(c, afterLocation);
+                    TextEditorModel.this.notifyTextObservers();
+                    TextEditorModel.this.setCursorLocation(beforeLocation);
+                }
+            };
+            ea.executeDo();
+            undoManager.push(ea);
+        }
     }
 
     public void deleteAfter() {
-        final char deleted;
+        if (getRightLocation(cursorLocation) != null) {
+            EditAction ea = new EditAction() {
+                Location location = cursorLocation.copy();
+                Character c;
 
-        if (cursorLocation.getX() == lineLength(cursorLocation.getY())) {
-            if (cursorLocation.getY() == lines.size() - 1)
-                return;
-            lines.get(cursorLocation.getY()).append(lines.get(cursorLocation.getY() + 1));
-            deleted = '\n';
-            lines.remove(cursorLocation.getY() + 1);
-        } else {
-            deleted = lines.get(cursorLocation.getY()).charAt(cursorLocation.getX());
-            lines.get(cursorLocation.getY()).deleteCharAt(cursorLocation.getX());
+                @Override
+                public void executeDo() {
+                    c = deleteAfter(location);
+                    TextEditorModel.this.notifyTextObservers();
+                    TextEditorModel.this.setCursorLocation(location);
+                }
+
+                @Override
+                public void executeUndo() {
+                    TextEditorModel.this.insert(c, location);
+                    TextEditorModel.this.notifyTextObservers();
+                    TextEditorModel.this.setCursorLocation(location);
+                }
+            };
+            ea.executeDo();
+            undoManager.push(ea);
         }
-
-        undoManager.push(new EditAction() {
-            char deletedChar = deleted;
-            @Override
-            public void executeDo() {
-                TextEditorModel.this.deleteAfter();
-            }
-
-            @Override
-            public void executeUndo() {
-                    TextEditorModel.this.insert(deletedChar);
-                    TextEditorModel.this.moveCursorLeft(false);
-            }
-        });
-
-        notifyTextObservers();
     }
 
-    public void deleteRange(LocationRange r) {
+
+    public String deleteRange(LocationRange r) {
 
         final String deleted = getSelectionString();
         setCursorLocation(r.getLower().copy());
@@ -323,31 +338,36 @@ public class TextEditorModel {
             lines.remove(ly + 1);
         }
 
-
-        undoManager.push(new EditAction() {
-            String deletedString = deleted;
-            @Override
-            public void executeDo() {
-                TextEditorModel.this.deleteAfter();
-            }
-
-            @Override
-            public void executeUndo() {
-                Location location =  TextEditorModel.this.getCursorLocation().copy();
-                TextEditorModel.this.insert(deletedString);
-                TextEditorModel.this.setCursorLocation(location);
-            }
-        });
-
-        clearSelection();
-
-        notifyTextObservers();
+        return deleted;
     }
 
     public void deleteSelection() {
-        if (isSelectedModeActive())
-            deleteRange(selectionRange);
+        if (isSelectedModeActive()) {
+            EditAction ea = new EditAction() {
+                LocationRange beforeSelectionRange = TextEditorModel.this.selectionRange.copy();
+                String deletedString;
+
+                @Override
+                public void executeDo() {
+                    TextEditorModel.this.selectionRange = null;
+                    TextEditorModel.this.setCursorLocation(beforeSelectionRange.getLower().copy());
+                    deletedString = deleteRange(selectionRange);
+                    TextEditorModel.this.notifyTextObservers();
+                }
+
+                @Override
+                public void executeUndo() {
+                    insert(deletedString, beforeSelectionRange.getLower());
+                    TextEditorModel.this.notifyTextObservers();
+                    TextEditorModel.this.selectionRange = beforeSelectionRange;
+                    TextEditorModel.this.setCursorLocation(beforeSelectionRange.getTo().copy());
+                }
+            };
+            ea.executeDo();
+            undoManager.push(ea);
+        }
     }
+
 
     public void clearSelection() {
         if (selectionRange == null)
@@ -356,26 +376,77 @@ public class TextEditorModel {
         notifyTextObservers();
     }
 
-    public void insert(String str) {
-        if (str==null) return;
-        for (char c : str.toCharArray())
-            insert(c);
+
+    public Location insert(String str,Location location){
+        Location tmpLocation = location.copy();
+        for(char c:str.toCharArray())
+            tmpLocation = insert(c,tmpLocation);
+        return tmpLocation;
     }
 
-    public void insert(char c) {
-        deleteSelection();
+    public void insert(String str) {
+        if(str==null) return;
+        final String strr = str;
+        EditAction ea = new EditAction() {
+            Location beforeLocation = cursorLocation.copy();
+            Location afterLocation;
+            String strInserted = strr;
 
-        if (c == '\r') return;
+            @Override
+            public void executeDo() {
+                afterLocation = insert(strr,beforeLocation);
+                TextEditorModel.this.notifyTextObservers();
+                TextEditorModel.this.setCursorLocation(afterLocation);
+            }
+
+            @Override
+            public void executeUndo() {
+                for(int i = 0;i<strr.length();i++)
+                    deleteAfter(beforeLocation);
+                TextEditorModel.this.notifyTextObservers();
+                TextEditorModel.this.setCursorLocation(afterLocation);
+            }
+        };
+        ea.executeDo();
+        undoManager.push(ea);
+    }
+
+    public Location insert(char c, Location location) {
         if (c == '\n') {
-            StringBuffer line = lines.get(cursorLocation.getY());
-            lines.add(cursorLocation.getY() + 1, new StringBuffer(line.substring(cursorLocation.getX())));
-            line.delete(cursorLocation.getX(), line.length());
-            setCursorLocation(new Location(0, cursorLocation.getY() + 1));
+            StringBuffer line = lines.get(location.getY());
+            lines.add(location.getY() + 1, new StringBuffer(line.substring(location.getX())));
+            line.delete(location.getX(), line.length());
+            return new Location(0, location.getY() + 1);
         } else {
-            lines.get(cursorLocation.getY()).insert(cursorLocation.getX(), c);
-            moveCursorRight(false);
+            lines.get(location.getY()).insert(location.getX(), c);
+            return getRightLocation(location);
         }
-        notifyTextObservers();
+    }
+
+
+    public void insert(char c) {
+        final char cc = c;
+        EditAction ea = new EditAction() {
+            Location beforeLocation = cursorLocation.copy();
+            Location afterLocation;
+            Character cInserted = cc;
+
+            @Override
+            public void executeDo() {
+                afterLocation = TextEditorModel.this.insert(cInserted, beforeLocation);
+                TextEditorModel.this.notifyTextObservers();
+                TextEditorModel.this.setCursorLocation(afterLocation);
+            }
+
+            @Override
+            public void executeUndo() {
+                deleteBefore(afterLocation);
+                TextEditorModel.this.notifyTextObservers();
+                TextEditorModel.this.setCursorLocation(beforeLocation);
+            }
+        };
+        ea.executeDo();
+        undoManager.push(ea);
     }
 
     private void pushSelectionToClipboard() {
@@ -404,7 +475,7 @@ public class TextEditorModel {
                 sb.append(it.next());
                 sb.append(System.lineSeparator());
             }
-            assert hy<lines.size();
+            assert hy < lines.size();
 
             sb.append(lines.get(hy).substring(0, hx));
         }

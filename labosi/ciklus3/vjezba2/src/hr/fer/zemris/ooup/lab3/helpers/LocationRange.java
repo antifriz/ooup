@@ -61,4 +61,8 @@ public class LocationRange {
         result = 31 * result + to.hashCode();
         return result;
     }
+
+    public LocationRange copy(){
+        return new LocationRange(from.copy(),to.copy());
+    }
 }
