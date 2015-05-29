@@ -384,8 +384,8 @@ public class TextEditorModel {
     }
 
     public void insert(String str) {
-        assert str!=null;
-        if(isSelectedModeActive())
+        assert str != null;
+        if (isSelectedModeActive())
             deleteSelection();
         final String strr = str;
         EditAction ea = new EditAction() {
@@ -426,7 +426,7 @@ public class TextEditorModel {
 
 
     public void insert(char c) {
-        if(isSelectedModeActive())
+        if (isSelectedModeActive())
             deleteSelection();
         final char cc = c;
         EditAction ea = new EditAction() {
@@ -495,10 +495,22 @@ public class TextEditorModel {
     }
 
     public void paste() {
+        if (getClipboardStack().isEmpty()) return;
         insert(getClipboardStack().peek());
     }
 
+    public Location getEOF(){
+        return new Location(lineLength(lines.size()-1),lines.size()-1);
+    }
+
+    public void selectAll(){
+        Location eof = getEOF();
+        selectionRange = new LocationRange(new Location(0,0),eof);
+        setCursorLocation(eof);
+    }
+
     public void pasteSpecial() {
+        if (getClipboardStack().isEmpty()) return;
         insert(getClipboardStack().pop());
     }
 
