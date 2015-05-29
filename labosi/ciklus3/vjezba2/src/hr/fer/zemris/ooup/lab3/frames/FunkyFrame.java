@@ -25,7 +25,7 @@ public class FunkyFrame extends JFrame {
     protected void processKeyEvent(KeyEvent e) {
         super.processKeyEvent(e);
 
-        if(e.getKeyCode() == KeyEvent.VK_ENTER){
+        if(e.getKeyCode() == KeyEvent.VK_ESCAPE){
             this.dispose();
             System.exit(0);
         }

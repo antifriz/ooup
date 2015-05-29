@@ -43,6 +43,7 @@ public class TextEditorModel {
 
     public void setCursorLocation(Location cursorLocation) {
         this.cursorLocation = cursorLocation;
+        notifyCursorObservers();
     }
 
     public void attachCursorObserver(CursorObserver observer) {
@@ -175,7 +176,7 @@ public class TextEditorModel {
 
             @Override
             public boolean hasNext() {
-                return i<lines.size();
+                return i < lines.size();
             }
 
             @Override
@@ -226,7 +227,7 @@ public class TextEditorModel {
 
     public void deleteBefore() {
         if (cursorLocation.getX() == 0 && cursorLocation.getY() == 0)
-                return;
+            return;
 
         Location lastLocation = cursorLocation.copy();
         moveCursorLeft(false);
@@ -257,8 +258,7 @@ public class TextEditorModel {
 
         boolean oneLiner = r.getFrom().getY() == r.getTo().getY();
 
-        cursorLocation = r.getLower().copy();
-        notifyCursorObservers();
+        setCursorLocation(r.getLower().copy());
 
         if (oneLiner) {
             lines.get(r.getLower().getY()).delete(r.getLower().getX(), r.getHigher().getX());
@@ -279,10 +279,29 @@ public class TextEditorModel {
         notifyTextObservers();
     }
 
+    public void deleteSelection(){
+        if(isSelectedModeActive())
+            deleteRange(selectionRange);
+    }
+
     public void clearSelection() {
         if (selectionRange == null)
             return;
         selectionRange = null;
+        notifyTextObservers();
+    }
+
+    public void insert(char c) {
+        if (c == '\r') return;
+        if (c == '\n') {
+            StringBuffer line = lines.get(cursorLocation.getY());
+            lines.add(cursorLocation.getY() + 1, new StringBuffer(line.substring(cursorLocation.getX())));
+            line.delete(cursorLocation.getX(), line.length());
+            setCursorLocation(new Location(0, cursorLocation.getY() + 1));
+        } else {
+            lines.get(cursorLocation.getY()).insert(cursorLocation.getX(), c);
+            moveCursorRight(false);
+        }
         notifyTextObservers();
     }
 }

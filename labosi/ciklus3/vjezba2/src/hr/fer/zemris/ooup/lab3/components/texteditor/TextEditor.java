@@ -20,7 +20,7 @@ public class TextEditor extends JComponent implements KeyListener {
     protected static final Color SELECTION_BG_COLOR = Color.getHSBColor(0.5f, 0.8f, 0.5f);
     protected static final Color SELECTION_TXT_COLOR = Color.BLACK;
 
-    public TextEditorModel getTextEditorModel() {
+    public TextEditorModel getModel() {
         return textEditorModel;
     }
 
@@ -66,11 +66,11 @@ public class TextEditor extends JComponent implements KeyListener {
         g.setColor(TXT_COLOR);
 
         int textHeight = g.getFontMetrics().getHeight();
-        if (getTextEditorModel().isSelectedModeActive()) {
+        if (getModel().isSelectedModeActive()) {
 
-            LocationRange selection = getTextEditorModel().getSelectionRange();
+            LocationRange selection = getModel().getSelectionRange();
             {
-                Iterator<StringBuffer> it = getTextEditorModel().linesRange(0, selection.getLower().getY());
+                Iterator<StringBuffer> it = getModel().linesRange(0, selection.getLower().getY());
 
                 while (it.hasNext()) {
                     yOffset += textHeight;
@@ -82,7 +82,7 @@ public class TextEditor extends JComponent implements KeyListener {
                 int lowerLimit = selection.getLower().getX();
                 int upperLimit = selection.getHigher().getX();
 
-                StringBuffer line = getTextEditorModel().getLines().get(selection.getLower().getY());
+                StringBuffer line = getModel().getLines().get(selection.getLower().getY());
 
                 paintLine(g, yOffset, lowerLimit, upperLimit, line);
             } else {
@@ -91,11 +91,11 @@ public class TextEditor extends JComponent implements KeyListener {
 
                     int lowerLimit = selection.getLower().getX();
 
-                    StringBuffer line = getTextEditorModel().getLines().get(selection.getLower().getY());
+                    StringBuffer line = getModel().getLines().get(selection.getLower().getY());
 
                     paintLine(g, yOffset, lowerLimit, line.length(), line);
                 }
-                Iterator<StringBuffer> it = getTextEditorModel().linesRange(selection.getLower().getY() + 1, selection.getHigher().getY());
+                Iterator<StringBuffer> it = getModel().linesRange(selection.getLower().getY() + 1, selection.getHigher().getY());
 
                 while (it.hasNext()) {
                     yOffset += textHeight;
@@ -107,13 +107,13 @@ public class TextEditor extends JComponent implements KeyListener {
 
                     int upperLimit = selection.getHigher().getX();
 
-                    StringBuffer line = getTextEditorModel().getLines().get(selection.getHigher().getY());
+                    StringBuffer line = getModel().getLines().get(selection.getHigher().getY());
 
                     paintLine(g, yOffset, 0, upperLimit, line);
                 }
             }
             {
-                Iterator<StringBuffer> it = getTextEditorModel().linesRange(selection.getHigher().getY() + 1, getTextEditorModel().getLines().size());
+                Iterator<StringBuffer> it = getModel().linesRange(selection.getHigher().getY() + 1, getModel().getLines().size());
 
                 while (it.hasNext()) {
                     yOffset += textHeight;
@@ -122,7 +122,7 @@ public class TextEditor extends JComponent implements KeyListener {
             }
 
         } else {
-            Iterator<StringBuffer> it = getTextEditorModel().allLines();
+            Iterator<StringBuffer> it = getModel().allLines();
             while (it.hasNext()) {
                 yOffset += textHeight;
                 String str = it.next().toString();
@@ -149,10 +149,10 @@ public class TextEditor extends JComponent implements KeyListener {
     }
 
     protected void paintCursor(Graphics g) {
-        Location cursorLocation = getTextEditorModel().getCursorLocation();
+        Location cursorLocation = getModel().getCursorLocation();
         int textHeight = g.getFontMetrics().getHeight();
 
-        char[] line = getTextEditorModel().getLines().get(cursorLocation.getY()).toString().toCharArray();
+        char[] line = getModel().getLines().get(cursorLocation.getY()).toString().toCharArray();
         int screenX = g.getFontMetrics().charsWidth(line, 0, cursorLocation.getX());
         int screenY = textHeight * cursorLocation.getY();
         g.setColor(Color.RED);
@@ -162,43 +162,49 @@ public class TextEditor extends JComponent implements KeyListener {
 
     @Override
     public void keyTyped(KeyEvent keyEvent) {
-
+        if(keyEvent.getKeyChar() == KeyEvent.VK_BACK_SPACE) return;
+        if(keyEvent.getKeyChar() == KeyEvent.VK_DELETE) return;
+        /*
+        if(keyEvent.getKeyCode() == KeyEvent.VK_BACK_SPACE)
+            return;
+*/
+        getModel().insert(keyEvent.getKeyChar());
     }
 
     @Override
     public void keyPressed(KeyEvent e) {
-        Location lastCursorLocation = getTextEditorModel().getCursorLocation();
+        Location lastCursorLocation = getModel().getCursorLocation();
         switch (e.getKeyCode()) {
             case KeyEvent.VK_UP:
-                getTextEditorModel().moveCursorUp(e.isShiftDown());
+                getModel().moveCursorUp(e.isShiftDown());
                 break;
             case KeyEvent.VK_DOWN:
-                getTextEditorModel().moveCursorDown(e.isShiftDown());
+                getModel().moveCursorDown(e.isShiftDown());
                 break;
             case KeyEvent.VK_LEFT:
-                getTextEditorModel().moveCursorLeft(e.isShiftDown());
+                getModel().moveCursorLeft(e.isShiftDown());
                 break;
             case KeyEvent.VK_RIGHT:
-                getTextEditorModel().moveCursorRight(e.isShiftDown());
+                getModel().moveCursorRight(e.isShiftDown());
                 break;
             case KeyEvent.VK_BACK_SPACE:
-                if(getTextEditorModel().isSelectedModeActive())
-                    getTextEditorModel().deleteRange(getTextEditorModel().getSelectionRange());
+                if(getModel().isSelectedModeActive())
+                    getModel().deleteSelection();
                 else
-                    getTextEditorModel().deleteBefore();
+                    getModel().deleteBefore();
                 break;
             case KeyEvent.VK_DELETE:
-                if(getTextEditorModel().isSelectedModeActive())
-                    getTextEditorModel().deleteRange(getTextEditorModel().getSelectionRange());
+                if(getModel().isSelectedModeActive())
+                    getModel().deleteSelection();
                 else
-                    getTextEditorModel().deleteAfter();
+                    getModel().deleteAfter();
                 break;
             default:
                 break;
         }
-/*        if (getTextEditorModel().isSelectedModeActive()) {
-            System.out.println(getTextEditorModel().getSelectionRange().getLower());
-            System.out.println(getTextEditorModel().getSelectionRange().getHigher());
+/*        if (getModel().isSelectedModeActive()) {
+            System.out.println(getModel().getSelectionRange().getLower());
+            System.out.println(getModel().getSelectionRange().getHigher());
             System.out.println();
         }*/
     }
