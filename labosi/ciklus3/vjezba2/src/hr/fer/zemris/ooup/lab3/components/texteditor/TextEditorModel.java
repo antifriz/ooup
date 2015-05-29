@@ -89,7 +89,7 @@ public class TextEditorModel {
     public void moveCursorLeft(boolean selectMode) {
         Location lastLocation = cursorLocation.copy();
         Location nextLocation = getLeftLocation(cursorLocation);
-        if(nextLocation == null) return;
+        if (nextLocation == null) return;
         cursorLocation = nextLocation;
         processCursorMove(selectMode, lastLocation);
     }
@@ -97,7 +97,7 @@ public class TextEditorModel {
     public void moveCursorRight(boolean selectMode) {
         Location lastLocation = cursorLocation.copy();
         Location nextLocation = getRightLocation(cursorLocation);
-        if(nextLocation == null) return;
+        if (nextLocation == null) return;
         cursorLocation = nextLocation;
         processCursorMove(selectMode, lastLocation);
     }
@@ -141,10 +141,10 @@ public class TextEditorModel {
         return selectionRange;
     }
 
-   /* public void setSelectionRange(LocationRange r) {
-        selectionRange = r;
-    }
-*/
+    /* public void setSelectionRange(LocationRange r) {
+         selectionRange = r;
+     }
+ */
     public void processCursorMove(boolean isSelectMode, Location last) {
         if (isSelectMode) {
             appendToSelection(last);
@@ -377,15 +377,15 @@ public class TextEditorModel {
     }
 
 
-    public Location insert(String str,Location location){
+    public Location insert(String str, Location location) {
         Location tmpLocation = location.copy();
-        for(char c:str.toCharArray())
-            tmpLocation = insert(c,tmpLocation);
+        for (char c : str.toCharArray())
+            tmpLocation = insert(c, tmpLocation);
         return tmpLocation;
     }
 
     public void insert(String str) {
-        if(str==null) return;
+        if (str == null) return;
         final String strr = str;
         EditAction ea = new EditAction() {
             Location beforeLocation = cursorLocation.copy();
@@ -394,14 +394,14 @@ public class TextEditorModel {
 
             @Override
             public void executeDo() {
-                afterLocation = insert(strr,beforeLocation);
+                afterLocation = insert(strr, beforeLocation);
                 TextEditorModel.this.notifyTextObservers();
                 TextEditorModel.this.setCursorLocation(afterLocation);
             }
 
             @Override
             public void executeUndo() {
-                for(int i = 0;i<strr.length();i++)
+                for (int i = 0; i < strr.length(); i++)
                     deleteAfter(beforeLocation);
                 TextEditorModel.this.notifyTextObservers();
                 TextEditorModel.this.setCursorLocation(afterLocation);
