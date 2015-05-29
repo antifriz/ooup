@@ -17,8 +17,8 @@ public class TextEditor extends JComponent implements KeyListener {
 
     protected static final int CURSOR_THICKNESS = 0;
     protected static final Color TXT_COLOR = Color.BLACK;
-    protected static final Color SELECTION_BG_COLOR = Color.getHSBColor(0.5f, 0.8f, 0.5f);
-    protected static final Color SELECTION_TXT_COLOR = Color.BLACK;
+    protected static final Color SELECTION_BG_COLOR = Color.getHSBColor(0.6f, 0.5f, 1f);
+    protected static final Color SELECTION_TXT_COLOR = Color.WHITE;
 
     public TextEditorModel getModel() {
         return textEditorModel;
@@ -27,20 +27,19 @@ public class TextEditor extends JComponent implements KeyListener {
     public TextEditor(TextEditorModel textEditorModel) {
         this.textEditorModel = textEditorModel;
 
-        textEditorModel.attach(new CursorObserver() {
+        textEditorModel.attachCursorObserver(new CursorObserver() {
             @Override
             public void updateCursorLocation(Location loc) {
                 TextEditor.this.repaint();
             }
         });
 
-        textEditorModel.attach(new TextObserver() {
+        textEditorModel.attachTextObserver(new TextObserver() {
             @Override
             public void updateText() {
                 TextEditor.this.repaint();
             }
         });
-
 
     }
 
@@ -53,6 +52,16 @@ public class TextEditor extends JComponent implements KeyListener {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
+        Graphics2D graphics2D = (Graphics2D) g;
+
+        //Set  anti-alias!
+        graphics2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                RenderingHints.VALUE_ANTIALIAS_ON);
+
+        // Set anti-alias for text
+        graphics2D.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
+                RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+
         paintText(g);
         paintCursor(g);
     }
@@ -61,6 +70,7 @@ public class TextEditor extends JComponent implements KeyListener {
         int yOffset = 0;
 
         g.setColor(TXT_COLOR);
+        g.setFont(new Font(Font.SANS_SERIF,Font.PLAIN,13));
 
         int textHeight = g.getFontMetrics().getHeight();
         if (getModel().isSelectedModeActive()) {
@@ -201,6 +211,18 @@ public class TextEditor extends JComponent implements KeyListener {
             case KeyEvent.VK_C:
                 if(e.isControlDown())
                     getModel().copySelection();
+                break;
+            case KeyEvent.VK_A:
+                if(e.isControlDown())
+                    getModel().selectAll();
+                break;
+            case KeyEvent.VK_Z:
+                if(e.isControlDown())
+                    UndoManager.getInstance().undo();
+                break;
+            case KeyEvent.VK_Y:
+                if(e.isControlDown())
+                    UndoManager.getInstance().redo();
                 break;
             case KeyEvent.VK_V:
                 if(e.isControlDown())

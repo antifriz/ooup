@@ -28,12 +28,14 @@ public class TextEditorModel {
         for (String line : lines.split(System.lineSeparator()))
             this.lines.add(new StringBuffer(line));
 
-        this.cursorLocation = new Location(0, 0);
-        this.selectionRange = null;
+
         this.cursorObservers = new ArrayList<CursorObserver>();
         this.textObservers = new ArrayList<TextObserver>();
         this.clipboardStack = new ClipboardStack();
         this.undoManager = UndoManager.getInstance();
+
+        this.cursorLocation = new Location(0, 0);
+        this.selectionRange = null;
     }
 
     public int lineLength(int i) {
@@ -46,11 +48,11 @@ public class TextEditorModel {
     }
 
 
-    public void attach(CursorObserver observer) {
+    public void attachCursorObserver(CursorObserver observer) {
         cursorObservers.add(observer);
     }
 
-    public void detach(CursorObserver observer) {
+    public void detachCursorObserver(CursorObserver observer) {
         cursorObservers.remove(observer);
     }
 
@@ -146,20 +148,10 @@ public class TextEditorModel {
      }
  */
     public void processCursorMove(boolean isSelectMode, Location last) {
-        if (isSelectMode) {
-            appendToSelection(last);
-        } else {
-            clearSelection();
-        }
+        if (isSelectMode) appendToSelection(last);
+        else clearSelection();
 
-//
-//        if(!from.lessThan(to)){
-//            // nothing to select
-//            clearSelection();
-//            return;
-//        }
-
-        notifyTextObservers();
+        notifyCursorObservers();
     }
 
     private void appendToSelection(Location last) {
@@ -225,11 +217,11 @@ public class TextEditorModel {
         };
     }
 
-    public void attach(TextObserver observer) {
+    public void attachTextObserver(TextObserver observer) {
         textObservers.add(observer);
     }
 
-    public void detach(TextObserver observer) {
+    public void detachTextObserver(TextObserver observer) {
         textObservers.remove(observer);
     }
 
@@ -395,17 +387,17 @@ public class TextEditorModel {
 
             @Override
             public void executeDo() {
-                afterLocation = insert(strr, beforeLocation);
+                afterLocation = insert(strInserted, beforeLocation);
                 TextEditorModel.this.notifyTextObservers();
                 TextEditorModel.this.setCursorLocation(afterLocation);
             }
 
             @Override
             public void executeUndo() {
-                for (int i = 0; i < strr.length(); i++)
+                for (int i = 0; i < strInserted.length(); i++)
                     deleteAfter(beforeLocation);
                 TextEditorModel.this.notifyTextObservers();
-                TextEditorModel.this.setCursorLocation(afterLocation);
+                TextEditorModel.this.setCursorLocation(beforeLocation);
             }
         };
         ea.executeDo();
@@ -499,13 +491,13 @@ public class TextEditorModel {
         insert(getClipboardStack().peek());
     }
 
-    public Location getEOF(){
-        return new Location(lineLength(lines.size()-1),lines.size()-1);
+    public Location getEOF() {
+        return new Location(lineLength(lines.size() - 1), lines.size() - 1);
     }
 
-    public void selectAll(){
+    public void selectAll() {
         Location eof = getEOF();
-        selectionRange = new LocationRange(new Location(0,0),eof);
+        selectionRange = new LocationRange(new Location(0, 0), eof);
         setCursorLocation(eof);
     }
 
