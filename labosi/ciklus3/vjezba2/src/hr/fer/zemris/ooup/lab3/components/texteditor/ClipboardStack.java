@@ -33,11 +33,16 @@ public class ClipboardStack {
 
     public void push(String string){
         this.stack.push(string);
+        notifyObservers();
     }
     public String pop(){
-        return this.stack.pop();
+        String str = this.stack.pop();
+        notifyObservers();
+        return str;
     }
     public String peek(){
-        return this.stack.peek();
+        String str = this.stack.peek();
+        notifyObservers();
+        return str;
     }
 }
