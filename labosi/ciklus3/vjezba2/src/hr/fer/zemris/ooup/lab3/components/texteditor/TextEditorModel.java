@@ -18,6 +18,7 @@ public class TextEditorModel {
 
     private List<CursorObserver> cursorObservers;
     private List<TextObserver> textObservers;
+    private ClipboardStack clipboardStack;
 
 
     public TextEditorModel(String lines) {
@@ -30,6 +31,7 @@ public class TextEditorModel {
         this.selectionRange = null;
         this.cursorObservers = new ArrayList<CursorObserver>();
         this.textObservers = new ArrayList<TextObserver>();
+        this.clipboardStack = new ClipboardStack();
     }
 
     public int lineLength(int i) {
@@ -46,11 +48,11 @@ public class TextEditorModel {
         notifyCursorObservers();
     }
 
-    public void attachCursorObserver(CursorObserver observer) {
+    public void attach(CursorObserver observer) {
         cursorObservers.add(observer);
     }
 
-    public void detachCursorObserver(CursorObserver observer) {
+    public void detach(CursorObserver observer) {
         cursorObservers.remove(observer);
     }
 
@@ -216,11 +218,11 @@ public class TextEditorModel {
         };
     }
 
-    public void attachTextObserver(TextObserver observer) {
+    public void attach(TextObserver observer) {
         textObservers.add(observer);
     }
 
-    public void detachTextObserver(TextObserver observer) {
+    public void detach(TextObserver observer) {
         textObservers.remove(observer);
     }
 
@@ -260,18 +262,18 @@ public class TextEditorModel {
 
     public void deleteRange(LocationRange r) {
 
-        boolean oneLiner = r.getFrom().getY() == r.getTo().getY();
 
         setCursorLocation(r.getLower().copy());
 
         int ly = r.getLower().getY();
         int lx = r.getLower().getX();
         int hx = r.getHigher().getX();
+        int hy = r.getHigher().getY();
+        boolean oneLiner = ly == hy;
 
         if (oneLiner) lines.get(ly).delete(lx, hx);
         else {
             lines.get(ly).delete(lx, lines.get(ly).length());
-            int hy = r.getHigher().getY();
 
             Iterator<StringBuffer> it = linesRange(ly + 1, hy);
             while (it.hasNext()) it.remove();
@@ -298,8 +300,8 @@ public class TextEditorModel {
         notifyTextObservers();
     }
 
-    public void insert(String str){
-        for(char c: str.toCharArray())
+    public void insert(String str) {
+        for (char c : str.toCharArray())
             insert(c);
     }
 
@@ -317,5 +319,56 @@ public class TextEditorModel {
             moveCursorRight(false);
         }
         notifyTextObservers();
+    }
+
+    private void pushSelectionToClipboard() {
+        if (!isSelectedModeActive()) return;
+
+        int ly = selectionRange.getLower().getY();
+        int lx = selectionRange.getLower().getX();
+        int hx = selectionRange.getHigher().getX();
+        int hy = selectionRange.getHigher().getY();
+        boolean oneLiner = ly == hy;
+
+        StringBuilder sb = new StringBuilder();
+
+        if (oneLiner) sb.append(lines.get(ly).substring(lx, hx));
+        else {
+            System.out.println(""+selectionRange.getLower()+" " + selectionRange.getHigher());
+
+            sb.append(lines.get(ly).substring(lx));
+            sb.append(System.lineSeparator());
+
+            Iterator<StringBuffer> it = linesRange(selectionRange.getLower().getY() + 1, selectionRange.getHigher().getY());
+            while (it.hasNext()) {
+                sb.append(it.next());
+                sb.append(System.lineSeparator());
+            }
+            assert hy<lines.size();
+
+            sb.append(lines.get(hy).substring(0, hx));
+        }
+        getClipboardStack().push(sb.toString());
+    }
+
+    public void copySelection() {
+        pushSelectionToClipboard();
+    }
+
+    public void cutSelection() {
+        pushSelectionToClipboard();
+        deleteSelection();
+    }
+
+    public void paste() {
+        insert(getClipboardStack().peek());
+    }
+
+    public void pasteSpecial() {
+        insert(getClipboardStack().pop());
+    }
+
+    public ClipboardStack getClipboardStack() {
+        return clipboardStack;
     }
 }

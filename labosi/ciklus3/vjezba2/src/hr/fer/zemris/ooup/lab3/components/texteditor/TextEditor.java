@@ -27,14 +27,14 @@ public class TextEditor extends JComponent implements KeyListener {
     public TextEditor(TextEditorModel textEditorModel) {
         this.textEditorModel = textEditorModel;
 
-        textEditorModel.attachCursorObserver(new CursorObserver() {
+        textEditorModel.attach(new CursorObserver() {
             @Override
             public void updateCursorLocation(Location loc) {
                 TextEditor.this.repaint();
             }
         });
 
-        textEditorModel.attachTextObserver(new TextObserver() {
+        textEditorModel.attach(new TextObserver() {
             @Override
             public void updateText() {
                 TextEditor.this.repaint();
@@ -164,6 +164,8 @@ public class TextEditor extends JComponent implements KeyListener {
     public void keyTyped(KeyEvent keyEvent) {
         if(keyEvent.getKeyChar() == KeyEvent.VK_BACK_SPACE) return;
         if(keyEvent.getKeyChar() == KeyEvent.VK_DELETE) return;
+        if(keyEvent.isControlDown())
+            return;
         /*
         if(keyEvent.getKeyCode() == KeyEvent.VK_BACK_SPACE)
             return;
@@ -198,6 +200,23 @@ public class TextEditor extends JComponent implements KeyListener {
                     getModel().deleteSelection();
                 else
                     getModel().deleteAfter();
+                break;
+            case KeyEvent.VK_C:
+                if(e.isControlDown())
+                    getModel().copySelection();
+                break;
+            case KeyEvent.VK_V:
+                if(e.isControlDown())
+                {
+                    if(e.isShiftDown())
+                        getModel().pasteSpecial();
+                    else
+                        getModel().paste();
+                }
+                break;
+            case KeyEvent.VK_X:
+                if(e.isControlDown())
+                    getModel().cutSelection();
                 break;
             default:
                 break;
