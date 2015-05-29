@@ -19,6 +19,7 @@ public class TextEditorModel {
     private List<CursorObserver> cursorObservers;
     private List<TextObserver> textObservers;
     private ClipboardStack clipboardStack;
+    private UndoManager undoManager;
 
 
     public TextEditorModel(String lines) {
@@ -32,6 +33,7 @@ public class TextEditorModel {
         this.cursorObservers = new ArrayList<CursorObserver>();
         this.textObservers = new ArrayList<TextObserver>();
         this.clipboardStack = new ClipboardStack();
+        this.undoManager = UndoManager.getInstance();
     }
 
     public int lineLength(int i) {
@@ -235,6 +237,8 @@ public class TextEditorModel {
         if (cursorLocation.getX() == 0 && cursorLocation.getY() == 0)
             return;
 
+        final String deleted;
+
         Location lastLocation = cursorLocation.copy();
         moveCursorLeft(false);
         if (lastLocation.getX() == 0) {
@@ -242,27 +246,62 @@ public class TextEditorModel {
                 return;
             lines.get(lastLocation.getY() - 1).append(lines.get(lastLocation.getY()));
             lines.remove(lastLocation.getY());
+            deleted = System.lineSeparator();
         } else {
+            deleted = "" + lines.get(lastLocation.getY()).charAt(lastLocation.getX() - 1);
             lines.get(lastLocation.getY()).deleteCharAt(lastLocation.getX() - 1);
         }
+
+        undoManager.push(new EditAction() {
+            String deletedString = deleted;
+            @Override
+            public void executeDo() {
+                TextEditorModel.this.deleteBefore();
+            }
+
+            @Override
+            public void executeUndo() {
+                TextEditorModel.this.insert(deletedString);
+            }
+        });
+
         notifyTextObservers();
     }
 
     public void deleteAfter() {
+        final char deleted;
+
         if (cursorLocation.getX() == lineLength(cursorLocation.getY())) {
             if (cursorLocation.getY() == lines.size() - 1)
                 return;
             lines.get(cursorLocation.getY()).append(lines.get(cursorLocation.getY() + 1));
+            deleted = '\n';
             lines.remove(cursorLocation.getY() + 1);
         } else {
+            deleted = lines.get(cursorLocation.getY()).charAt(cursorLocation.getX());
             lines.get(cursorLocation.getY()).deleteCharAt(cursorLocation.getX());
         }
+
+        undoManager.push(new EditAction() {
+            char deletedChar = deleted;
+            @Override
+            public void executeDo() {
+                TextEditorModel.this.deleteAfter();
+            }
+
+            @Override
+            public void executeUndo() {
+                    TextEditorModel.this.insert(deletedChar);
+                    TextEditorModel.this.moveCursorLeft(false);
+            }
+        });
+
         notifyTextObservers();
     }
 
     public void deleteRange(LocationRange r) {
 
-
+        final String deleted = getSelectionString();
         setCursorLocation(r.getLower().copy());
 
         int ly = r.getLower().getY();
@@ -283,6 +322,23 @@ public class TextEditorModel {
             lines.get(ly).append(nextLine);
             lines.remove(ly + 1);
         }
+
+
+        undoManager.push(new EditAction() {
+            String deletedString = deleted;
+            @Override
+            public void executeDo() {
+                TextEditorModel.this.deleteAfter();
+            }
+
+            @Override
+            public void executeUndo() {
+                Location location =  TextEditorModel.this.getCursorLocation().copy();
+                TextEditorModel.this.insert(deletedString);
+                TextEditorModel.this.setCursorLocation(location);
+            }
+        });
+
         clearSelection();
 
         notifyTextObservers();
@@ -301,6 +357,7 @@ public class TextEditorModel {
     }
 
     public void insert(String str) {
+        if (str==null) return;
         for (char c : str.toCharArray())
             insert(c);
     }
@@ -324,6 +381,11 @@ public class TextEditorModel {
     private void pushSelectionToClipboard() {
         if (!isSelectedModeActive()) return;
 
+        String str = getSelectionString();
+        getClipboardStack().push(str);
+    }
+
+    private String getSelectionString() {
         int ly = selectionRange.getLower().getY();
         int lx = selectionRange.getLower().getX();
         int hx = selectionRange.getHigher().getX();
@@ -334,8 +396,6 @@ public class TextEditorModel {
 
         if (oneLiner) sb.append(lines.get(ly).substring(lx, hx));
         else {
-            System.out.println(""+selectionRange.getLower()+" " + selectionRange.getHigher());
-
             sb.append(lines.get(ly).substring(lx));
             sb.append(System.lineSeparator());
 
@@ -348,7 +408,7 @@ public class TextEditorModel {
 
             sb.append(lines.get(hy).substring(0, hx));
         }
-        getClipboardStack().push(sb.toString());
+        return sb.toString();
     }
 
     public void copySelection() {

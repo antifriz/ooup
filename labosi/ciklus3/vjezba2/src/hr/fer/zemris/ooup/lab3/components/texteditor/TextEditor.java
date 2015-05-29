@@ -42,9 +42,6 @@ public class TextEditor extends JComponent implements KeyListener {
         });
 
 
-        //this.getInputMap().put(KeyStroke.getKeyStroke("SPACE"),"pressed");
-
-
     }
 
 

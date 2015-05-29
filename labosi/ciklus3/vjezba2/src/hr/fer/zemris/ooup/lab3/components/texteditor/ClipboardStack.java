@@ -36,11 +36,13 @@ public class ClipboardStack {
         notifyObservers();
     }
     public String pop(){
+        if(!this.stack.isEmpty()) return null;
         String str = this.stack.pop();
         notifyObservers();
         return str;
     }
     public String peek(){
+        if(!this.stack.isEmpty()) return null;
         String str = this.stack.peek();
         notifyObservers();
         return str;
