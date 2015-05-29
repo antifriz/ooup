@@ -349,10 +349,10 @@ public class TextEditorModel {
 
                 @Override
                 public void executeDo() {
-                    TextEditorModel.this.selectionRange = null;
-                    TextEditorModel.this.setCursorLocation(beforeSelectionRange.getLower().copy());
                     deletedString = deleteRange(selectionRange);
                     TextEditorModel.this.notifyTextObservers();
+                    TextEditorModel.this.selectionRange = null;
+                    TextEditorModel.this.setCursorLocation(beforeSelectionRange.getLower().copy());
                 }
 
                 @Override
@@ -385,7 +385,9 @@ public class TextEditorModel {
     }
 
     public void insert(String str) {
-        if (str == null) return;
+        assert str!=null;
+        if(isSelectedModeActive())
+            deleteSelection();
         final String strr = str;
         EditAction ea = new EditAction() {
             Location beforeLocation = cursorLocation.copy();
@@ -425,6 +427,8 @@ public class TextEditorModel {
 
 
     public void insert(char c) {
+        if(isSelectedModeActive())
+            deleteSelection();
         final char cc = c;
         EditAction ea = new EditAction() {
             Location beforeLocation = cursorLocation.copy();
