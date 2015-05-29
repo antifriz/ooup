@@ -270,8 +270,8 @@ public class TextEditorModel {
 
                 @Override
                 public void executeDo() {
+                    afterLocation = TextEditorModel.this.getLeftLocation(beforeLocation);
                     c = deleteBefore(beforeLocation);
-                    afterLocation = TextEditorModel.this.getLeftLocation(afterLocation);
                     TextEditorModel.this.notifyTextObservers();
                     TextEditorModel.this.setCursorLocation(afterLocation);
                 }
@@ -367,7 +367,6 @@ public class TextEditorModel {
             undoManager.push(ea);
         }
     }
-
 
     public void clearSelection() {
         if (selectionRange == null)
