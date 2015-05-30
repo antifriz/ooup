@@ -1,8 +1,8 @@
 package hr.fer.zemris.ooup.lab3.components.statusbar;
 
-import hr.fer.zemris.ooup.lab3.components.texteditor.CursorObserver;
-import hr.fer.zemris.ooup.lab3.components.texteditor.TextEditorModel;
-import hr.fer.zemris.ooup.lab3.components.texteditor.TextObserver;
+import hr.fer.zemris.ooup.lab3.model.CursorObserver;
+import hr.fer.zemris.ooup.lab3.model.TextEditorModel;
+import hr.fer.zemris.ooup.lab3.model.TextObserver;
 import hr.fer.zemris.ooup.lab3.helpers.Location;
 
 import javax.swing.*;

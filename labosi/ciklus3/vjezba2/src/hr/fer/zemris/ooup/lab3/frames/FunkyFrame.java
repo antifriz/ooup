@@ -2,19 +2,36 @@ package hr.fer.zemris.ooup.lab3.frames;
 
 import hr.fer.zemris.ooup.lab3.components.statusbar.FunkyStatusBar;
 import hr.fer.zemris.ooup.lab3.components.texteditor.TextEditor;
-import hr.fer.zemris.ooup.lab3.components.texteditor.TextEditorModel;
+import hr.fer.zemris.ooup.lab3.model.TextEditorModel;
 
 import javax.swing.*;
+import javax.swing.filechooser.FileFilter;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 /**
  * Created by ivan on 5/28/15.
  */
 public class FunkyFrame extends JFrame {
-    TextEditorModel model = new TextEditorModel("Burek s mesom.\nJos jedan burek s mesom.\nGle, sirnica!");
+    TextEditorModel model;
+    String fileName;
+    String dirName;
 
     public FunkyFrame() throws HeadlessException {
+        fileName = "untitled.txt";
+        dirName = System.getProperty("user.dir");
+        model = new TextEditorModel();
+    }
+
+    public void initialize(){
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         JPanel panel = new JPanel();
@@ -33,7 +50,29 @@ public class FunkyFrame extends JFrame {
 
         model.notifyCursorObservers();
         model.notifyTextObservers();
+
+        setTitle(String.format("File - %s",fileName));
     }
+
+
+    private void loadFile(String fileName, String dirName) throws IOException {
+        model.setLines(new String( Files.readAllBytes(Paths.get(dirName,fileName))));
+        setTitle(String.format("File - %s",fileName));
+    }
+    private void saveFile(String fileName, String dirName) throws IOException {
+        File dir = new File(dirName);
+        File file = new File(dir,fileName);
+        if(!file.exists())
+            file.createNewFile();
+
+        FileWriter fw = new FileWriter(file.getAbsoluteFile());
+
+        BufferedWriter bw = new BufferedWriter(fw);
+        bw.write(model.getLinesString());
+        bw.close();
+    }
+
+
 
     private JToolBar createToolBar() {
         return new JToolBar();
@@ -56,13 +95,39 @@ public class FunkyFrame extends JFrame {
             menuItem = new JMenuItem("Open");
             menu.add(menuItem);
             {
-
+                menuItem.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent actionEvent) {
+                        JFileChooser c = new JFileChooser();
+                        int rVal = c.showOpenDialog(FunkyFrame.this);
+                        if (rVal == JFileChooser.APPROVE_OPTION) {
+                            try {
+                                loadFile(c.getSelectedFile().getName(), c.getCurrentDirectory().toString());
+                            } catch (IOException e) {
+                                JOptionPane.showMessageDialog(null, "Unable to load file");
+                            }
+                        }
+                    }
+                });
             }
 
             menuItem = new JMenuItem("Save");
             menu.add(menuItem);
             {
-
+                menuItem.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent actionEvent) {
+                        JFileChooser c = new JFileChooser();
+                        int rVal = c.showSaveDialog(FunkyFrame.this);
+                        if (rVal == JFileChooser.APPROVE_OPTION) {
+                            try {
+                                saveFile(c.getSelectedFile().getName(), c.getCurrentDirectory().toString());
+                            } catch (IOException e) {
+                                JOptionPane.showMessageDialog(null, "Unable to save file");
+                            }
+                        }
+                    }
+                });
             }
 
             menuItem = new JMenuItem("Exit");

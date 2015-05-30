@@ -2,6 +2,10 @@ package hr.fer.zemris.ooup.lab3.components.texteditor;
 
 import hr.fer.zemris.ooup.lab3.helpers.Location;
 import hr.fer.zemris.ooup.lab3.helpers.LocationRange;
+import hr.fer.zemris.ooup.lab3.model.CursorObserver;
+import hr.fer.zemris.ooup.lab3.model.TextEditorModel;
+import hr.fer.zemris.ooup.lab3.model.TextObserver;
+import hr.fer.zemris.ooup.lab3.model.UndoManager;
 
 import javax.swing.*;
 import java.awt.*;
