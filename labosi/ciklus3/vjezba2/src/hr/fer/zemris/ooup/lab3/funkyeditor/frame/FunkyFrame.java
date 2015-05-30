@@ -16,7 +16,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.io.*;
-import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
@@ -40,26 +39,37 @@ public class FunkyFrame extends JFrame {
     public void initialize() {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
+
         JPanel panel = new JPanel();
         panel.setLayout(new BorderLayout());
 
-        panel.add(createToolBar(), BorderLayout.PAGE_START);
+        panel.add(new FunkyToolBar(), BorderLayout.PAGE_START);
 
         TextEditor textEditor = new TextEditor(model);
-        panel.add(textEditor, BorderLayout.CENTER);
         addKeyListener(textEditor);
 
-        panel.add(createStatusBar(), BorderLayout.PAGE_END);
+        panel.add(textEditor, BorderLayout.CENTER);
+
+
+        panel.add(createBorderPanel(),BorderLayout.WEST);
+
+        panel.add(new FunkyStatusBar(model), BorderLayout.PAGE_END);
         add(panel);
 
         setJMenuBar(createMenuBar());
+
+        setTitle(String.format("File - %s", fileName));
 
         model.notifyCursorObservers();
         model.notifyTextObservers();
         model.getClipboardStack().notifyObservers();
         UndoManager.getInstance().notifyObservers();
+    }
 
-        setTitle(String.format("File - %s", fileName));
+    private JPanel createBorderPanel() {
+        JPanel panel = new JPanel();
+        panel.setBackground(Color.LIGHT_GRAY);
+        return panel;
     }
 
 
@@ -81,13 +91,92 @@ public class FunkyFrame extends JFrame {
         bw.close();
     }
 
+    class FunkyToolBar extends JToolBar implements UndoManagerObserver,ClipboardObserver,TextObserver{
+        JButton itemUndo, itemRedo, itemCopy, itemPaste, itemCut;
 
-    private JToolBar createToolBar() {
-        return new JToolBar();
-    }
+        public FunkyToolBar() {
+            model.attachTextObserver(this);
+            model.getClipboardStack().attach(this);
+            UndoManager.getInstance().attach(this);
 
-    private JPanel createStatusBar() {
-        return new FunkyStatusBar(model);
+                itemUndo = new JButton(new ImageIcon(getClass().getResource("/jlfgr-1_0/toolbarButtonGraphics/general/Undo16.gif")));
+                add(itemUndo);
+                {
+                    itemUndo.addActionListener(new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent actionEvent) {
+                            UndoManager.getInstance().undo();
+                        }
+                    });
+                }
+
+                itemRedo = new JButton(new ImageIcon(getClass().getResource("/jlfgr-1_0/toolbarButtonGraphics/general/Redo16.gif")));
+                add(itemRedo);
+                {
+                    itemRedo.addActionListener(new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent actionEvent) {
+                            UndoManager.getInstance().redo();
+                        }
+                    });
+                }
+
+                itemCut = new JButton(new ImageIcon(getClass().getResource("/jlfgr-1_0/toolbarButtonGraphics/general/Redo16.gif")));
+                add(itemCut);
+                {
+                    itemCut.addActionListener(new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent actionEvent) {
+                            model.cutSelection();
+                        }
+                    });
+                }
+
+                itemCopy = new JButton(new ImageIcon(getClass().getResource("/jlfgr-1_0/toolbarButtonGraphics/general/Copy16.gif")));
+                add(itemCopy);
+                {
+                    itemCopy.addActionListener(new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent actionEvent) {
+                            model.copySelection();
+                        }
+                    });
+                }
+
+                itemPaste = new JButton(new ImageIcon(getClass().getResource("/jlfgr-1_0/toolbarButtonGraphics/general/Paste16.gif")));
+                add(itemPaste);
+                {
+                    itemPaste.addActionListener(new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent actionEvent) {
+                            model.paste();
+                        }
+                    });
+                }
+
+            setFloatable(false);
+
+        }
+
+        @Override
+        public void onUpdateClipboard() {
+            itemPaste.setEnabled(!model.getClipboardStack().isEmpty());
+            repaint();
+        }
+
+        @Override
+        public void onUpdateUndoManager() {
+            itemUndo.setEnabled(!UndoManager.getInstance().isEmptyUndo());
+            itemRedo.setEnabled(!UndoManager.getInstance().isEmptyRedo());
+            repaint();
+        }
+
+        @Override
+        public void onUpdateTextObserver() {
+            itemCopy.setEnabled(model.isSelectedModeActive());
+            itemCut.setEnabled(model.isSelectedModeActive());
+            repaint();
+        }
     }
 
     class FunkyMenuBar extends JMenuBar implements UndoManagerObserver, ClipboardObserver, TextObserver {
@@ -103,7 +192,7 @@ public class FunkyFrame extends JFrame {
             menu = new JMenu("File");
             add(menu);
             {
-                menuItem = new JMenuItem("Open");
+                menuItem = new JMenuItem("Open",new ImageIcon(getClass().getResource("/jlfgr-1_0/toolbarButtonGraphics/general/Open16.gif")));
                 menu.add(menuItem);
                 {
                     menuItem.addActionListener(new ActionListener() {
@@ -122,7 +211,7 @@ public class FunkyFrame extends JFrame {
                     });
                 }
 
-                menuItem = new JMenuItem("Save");
+                menuItem = new JMenuItem("Save",new ImageIcon(getClass().getResource("/jlfgr-1_0/toolbarButtonGraphics/general/Save16.gif")));
                 menu.add(menuItem);
                 {
                     menuItem.addActionListener(new ActionListener() {
@@ -141,7 +230,7 @@ public class FunkyFrame extends JFrame {
                     });
                 }
 
-                menuItem = new JMenuItem("Exit");
+                menuItem = new JMenuItem("Exit",new ImageIcon(getClass().getResource("/jlfgr-1_0/toolbarButtonGraphics/general/Stop16.gif")));
                 menu.add(menuItem);
                 {
                     menuItem.addActionListener(new ActionListener() {
@@ -157,7 +246,7 @@ public class FunkyFrame extends JFrame {
             menu = new JMenu("Edit");
             add(menu);
             {
-                itemUndo = new JMenuItem("Undo");
+                itemUndo = new JMenuItem("Undo",new ImageIcon(getClass().getResource("/jlfgr-1_0/toolbarButtonGraphics/general/Undo16.gif")));
                 menu.add(itemUndo);
                 {
                     itemUndo.addActionListener(new ActionListener() {
@@ -168,7 +257,7 @@ public class FunkyFrame extends JFrame {
                     });
                 }
 
-                itemRedo = new JMenuItem("Redo");
+                itemRedo = new JMenuItem("Redo",new ImageIcon(getClass().getResource("/jlfgr-1_0/toolbarButtonGraphics/general/Redo16.gif")));
                 menu.add(itemRedo);
                 {
                     itemRedo.addActionListener(new ActionListener() {
@@ -179,7 +268,7 @@ public class FunkyFrame extends JFrame {
                     });
                 }
 
-                itemCut = new JMenuItem("Cut");
+                itemCut = new JMenuItem("Cut",new ImageIcon(getClass().getResource("/jlfgr-1_0/toolbarButtonGraphics/general/Cut16.gif")));
                 menu.add(itemCut);
                 {
                     itemCut.addActionListener(new ActionListener() {
@@ -190,7 +279,7 @@ public class FunkyFrame extends JFrame {
                     });
                 }
 
-                itemCopy = new JMenuItem("Copy");
+                itemCopy = new JMenuItem("Copy",new ImageIcon(getClass().getResource("/jlfgr-1_0/toolbarButtonGraphics/general/Copy16.gif")));
                 menu.add(itemCopy);
                 {
                     itemCopy.addActionListener(new ActionListener() {
@@ -201,7 +290,7 @@ public class FunkyFrame extends JFrame {
                     });
                 }
 
-                itemPaste = new JMenuItem("Paste");
+                itemPaste = new JMenuItem("Paste",new ImageIcon(getClass().getResource("/jlfgr-1_0/toolbarButtonGraphics/general/Paste16.gif")));
                 menu.add(itemPaste);
                 {
                     itemPaste.addActionListener(new ActionListener() {
@@ -223,7 +312,7 @@ public class FunkyFrame extends JFrame {
                     });
                 }
 
-                itemDeleteSection = new JMenuItem("Delete selection");
+                itemDeleteSection = new JMenuItem("Delete selection",new ImageIcon(getClass().getResource("/jlfgr-1_0/toolbarButtonGraphics/general/Delete16.gif")));
                 menu.add(itemDeleteSection);
                 {
                     itemDeleteSection.addActionListener(new ActionListener() {
@@ -234,7 +323,7 @@ public class FunkyFrame extends JFrame {
                     });
                 }
 
-                menuItem = new JMenuItem("Clear document");
+                menuItem = new JMenuItem("Clear document",new ImageIcon(getClass().getResource("/jlfgr-1_0/toolbarButtonGraphics/general/New16.gif")));
                 menu.add(menuItem);
                 {
                     menuItem.addActionListener(new ActionListener() {
@@ -249,7 +338,7 @@ public class FunkyFrame extends JFrame {
             menu = new JMenu("Move");
             add(menu);
             {
-                menuItem = new JMenuItem("Cursor to document start");
+                menuItem = new JMenuItem("Cursor to document start",new ImageIcon(getClass().getResource("/jlfgr-1_0/toolbarButtonGraphics/navigation/Back16.gif")));
                 menu.add(menuItem);
                 {
                     menuItem.addActionListener(new ActionListener() {
@@ -260,7 +349,7 @@ public class FunkyFrame extends JFrame {
                     });
                 }
 
-                menuItem = new JMenuItem("Cursor to document end");
+                menuItem = new JMenuItem("Cursor to document end",new ImageIcon(getClass().getResource("/jlfgr-1_0/toolbarButtonGraphics/navigation/Forward16.gif")));
                 menu.add(menuItem);
                 {
                     menuItem.addActionListener(new ActionListener() {

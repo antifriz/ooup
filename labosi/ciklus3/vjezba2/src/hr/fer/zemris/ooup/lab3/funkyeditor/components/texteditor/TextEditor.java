@@ -20,6 +20,7 @@ public class TextEditor extends JComponent implements KeyListener {
     private TextEditorModel textEditorModel;
 
     protected static final int CURSOR_THICKNESS = 0;
+    protected static final Color CURSOR_COLOR = Color.DARK_GRAY;
     protected static final Color TXT_COLOR = Color.BLACK;
     protected static final Color SELECTION_BG_COLOR = Color.getHSBColor(0.6f, 0.5f, 1f);
     protected static final Color SELECTION_TXT_COLOR = Color.WHITE;
@@ -166,7 +167,7 @@ public class TextEditor extends JComponent implements KeyListener {
         char[] line = getModel().getLines().get(cursorLocation.getY()).toString().toCharArray();
         int screenX = g.getFontMetrics().charsWidth(line, 0, cursorLocation.getX());
         int screenY = textHeight * cursorLocation.getY();
-        g.setColor(Color.RED);
+        g.setColor(CURSOR_COLOR);
         g.drawRect(screenX, screenY, CURSOR_THICKNESS, textHeight+g.getFontMetrics().getMaxDescent());
     }
 
