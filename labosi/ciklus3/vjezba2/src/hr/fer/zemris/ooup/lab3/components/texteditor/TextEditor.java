@@ -5,7 +5,7 @@ import hr.fer.zemris.ooup.lab3.helpers.LocationRange;
 import hr.fer.zemris.ooup.lab3.model.CursorObserver;
 import hr.fer.zemris.ooup.lab3.model.TextEditorModel;
 import hr.fer.zemris.ooup.lab3.model.TextObserver;
-import hr.fer.zemris.ooup.lab3.model.UndoManager;
+import hr.fer.zemris.ooup.lab3.model.undomanager.UndoManager;
 
 import javax.swing.*;
 import java.awt.*;
@@ -33,14 +33,14 @@ public class TextEditor extends JComponent implements KeyListener {
 
         textEditorModel.attachCursorObserver(new CursorObserver() {
             @Override
-            public void updateCursorLocation(Location loc) {
+            public void onUpdateCursorLocation(Location loc) {
                 TextEditor.this.repaint();
             }
         });
 
         textEditorModel.attachTextObserver(new TextObserver() {
             @Override
-            public void updateText() {
+            public void onUpdateTextObserver() {
                 TextEditor.this.repaint();
             }
         });

@@ -2,6 +2,8 @@ package hr.fer.zemris.ooup.lab3.model;
 
 import hr.fer.zemris.ooup.lab3.helpers.Location;
 import hr.fer.zemris.ooup.lab3.helpers.LocationRange;
+import hr.fer.zemris.ooup.lab3.model.clipboard.ClipboardStack;
+import hr.fer.zemris.ooup.lab3.model.undomanager.UndoManager;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -35,7 +37,7 @@ public class TextEditorModel {
         this.selectionRange = null;
     }
 
-    public void setLines(String lines){
+    public void setLines(String lines) {
         this.lines = new ArrayList<StringBuffer>();
 
         for (String line : lines.split(System.lineSeparator()))
@@ -67,7 +69,7 @@ public class TextEditorModel {
 
     public void notifyCursorObservers() {
         for (CursorObserver observer : cursorObservers)
-            observer.updateCursorLocation(cursorLocation);
+            observer.onUpdateCursorLocation(cursorLocation);
     }
 
     public void setCursorLocation(Location cursorLocation) {
@@ -149,13 +151,14 @@ public class TextEditorModel {
 
 
     public LocationRange getSelectionRange() {
-        return selectionRange;
+        return selectionRange.copy();
     }
 
-    /* public void setSelectionRange(LocationRange r) {
-         selectionRange = r;
-     }
- */
+    public void setSelectionRange(LocationRange r) {
+        selectionRange = r;
+        notifyTextObservers();
+    }
+
     public void processCursorMove(boolean isSelectMode, Location last) {
         if (isSelectMode) appendToSelection(last);
         else clearSelection();
@@ -236,7 +239,7 @@ public class TextEditorModel {
 
     public void notifyTextObservers() {
         for (TextObserver observer : textObservers)
-            observer.updateText();
+            observer.onUpdateTextObserver();
     }
 
     public Character deleteBefore(Location location) {
@@ -351,16 +354,16 @@ public class TextEditorModel {
                 @Override
                 public void executeDo() {
                     deletedString = deleteRange(selectionRange);
-                    TextEditorModel.this.notifyTextObservers();
                     TextEditorModel.this.selectionRange = null;
+                    TextEditorModel.this.notifyTextObservers();
                     TextEditorModel.this.setCursorLocation(beforeSelectionRange.getLower().copy());
                 }
 
                 @Override
                 public void executeUndo() {
                     insert(deletedString, beforeSelectionRange.getLower());
-                    TextEditorModel.this.notifyTextObservers();
                     TextEditorModel.this.selectionRange = beforeSelectionRange;
+                    TextEditorModel.this.notifyTextObservers();
                     TextEditorModel.this.setCursorLocation(beforeSelectionRange.getTo().copy());
                 }
             };
@@ -507,6 +510,7 @@ public class TextEditorModel {
     public void selectAll() {
         Location eof = getEOF();
         selectionRange = new LocationRange(new Location(0, 0), eof);
+        notifyTextObservers();
         setCursorLocation(eof);
     }
 
@@ -527,5 +531,13 @@ public class TextEditorModel {
             sb.append(System.lineSeparator());
         }
         return sb.toString();
+    }
+
+    public void moveCursorStart() {
+        setCursorLocation(new Location(0, 0));
+    }
+
+    public void moveCursorEnd() {
+        setCursorLocation(getEOF());
     }
 }

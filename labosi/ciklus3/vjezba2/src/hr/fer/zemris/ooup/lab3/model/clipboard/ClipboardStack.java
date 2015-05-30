@@ -1,4 +1,4 @@
-package hr.fer.zemris.ooup.lab3.model;
+package hr.fer.zemris.ooup.lab3.model.clipboard;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,7 +26,7 @@ public class ClipboardStack {
 
     public void notifyObservers(){
         for(ClipboardObserver observer: observers){
-            observer.updateClipboard();
+            observer.onUpdateClipboard();
         }
     }
 

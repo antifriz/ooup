@@ -37,12 +37,12 @@ public class FunkyStatusBar extends JPanel implements CursorObserver,TextObserve
     }
 
     @Override
-    public void updateCursorLocation(Location loc) {
+    public void onUpdateCursorLocation(Location loc) {
         cursorLocationLabel.setText(String.format("Cursor: %s",loc.toString()));
     }
 
     @Override
-    public void updateText() {
+    public void onUpdateTextObserver() {
         lineCounterLabel.setText(String.format("Lines: %d",model.getLines().size()));
     }
 }
