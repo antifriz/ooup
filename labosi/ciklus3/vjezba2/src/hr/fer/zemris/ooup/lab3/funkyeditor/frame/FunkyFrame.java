@@ -1,12 +1,14 @@
-package hr.fer.zemris.ooup.lab3.frames;
+package hr.fer.zemris.ooup.lab3.funkyeditor.frame;
 
-import hr.fer.zemris.ooup.lab3.components.statusbar.FunkyStatusBar;
-import hr.fer.zemris.ooup.lab3.components.texteditor.TextEditor;
-import hr.fer.zemris.ooup.lab3.model.TextEditorModel;
-import hr.fer.zemris.ooup.lab3.model.TextObserver;
-import hr.fer.zemris.ooup.lab3.model.clipboard.ClipboardObserver;
-import hr.fer.zemris.ooup.lab3.model.undomanager.UndoManager;
-import hr.fer.zemris.ooup.lab3.model.undomanager.UndoManagerObserver;
+import hr.fer.zemris.ooup.lab3.funkyeditor.components.statusbar.FunkyStatusBar;
+import hr.fer.zemris.ooup.lab3.funkyeditor.components.texteditor.TextEditor;
+import hr.fer.zemris.ooup.lab3.funkyeditor.model.TextEditorModel;
+import hr.fer.zemris.ooup.lab3.funkyeditor.model.TextObserver;
+import hr.fer.zemris.ooup.lab3.funkyeditor.model.clipboard.ClipboardObserver;
+import hr.fer.zemris.ooup.lab3.funkyeditor.model.undomanager.UndoManager;
+import hr.fer.zemris.ooup.lab3.funkyeditor.model.undomanager.UndoManagerObserver;
+import hr.fer.zemris.ooup.lab3.funkyeditor.plugins.Plugin;
+import hr.fer.zemris.ooup.lab3.funkyeditor.plugins.PluginFactory;
 
 import javax.swing.*;
 import java.awt.*;
@@ -14,36 +16,40 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.io.*;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
 /**
  * Created by ivan on 5/28/15.
  */
+
 public class FunkyFrame extends JFrame {
     TextEditorModel model;
     String fileName;
     String dirName;
+    String pluginDir;
 
     public FunkyFrame() throws HeadlessException {
         fileName = "untitled.txt";
         dirName = System.getProperty("user.dir");
+        pluginDir = Paths.get(System.getProperty("user.dir"), "out/production/vjezba2/plugins").toString();
         model = new TextEditorModel();
     }
 
-    public void initialize(){
+    public void initialize() {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         JPanel panel = new JPanel();
         panel.setLayout(new BorderLayout());
 
-        panel.add(createToolBar(),BorderLayout.PAGE_START);
+        panel.add(createToolBar(), BorderLayout.PAGE_START);
 
         TextEditor textEditor = new TextEditor(model);
         panel.add(textEditor, BorderLayout.CENTER);
         addKeyListener(textEditor);
 
-        panel.add(createStatusBar(),BorderLayout.PAGE_END);
+        panel.add(createStatusBar(), BorderLayout.PAGE_END);
         add(panel);
 
         setJMenuBar(createMenuBar());
@@ -58,13 +64,14 @@ public class FunkyFrame extends JFrame {
 
 
     private void loadFile(String fileName, String dirName) throws IOException {
-        model.setLines(new String( Files.readAllBytes(Paths.get(dirName,fileName))));
-        setTitle(String.format("File - %s",fileName));
+        model.setLines(new String(Files.readAllBytes(Paths.get(dirName, fileName))));
+        setTitle(String.format("File - %s", fileName));
     }
+
     private void saveFile(String fileName, String dirName) throws IOException {
         File dir = new File(dirName);
-        File file = new File(dir,fileName);
-        if(!file.exists())
+        File file = new File(dir, fileName);
+        if (!file.exists())
             file.createNewFile();
 
         FileWriter fw = new FileWriter(file.getAbsoluteFile());
@@ -75,7 +82,6 @@ public class FunkyFrame extends JFrame {
     }
 
 
-
     private JToolBar createToolBar() {
         return new JToolBar();
     }
@@ -84,8 +90,8 @@ public class FunkyFrame extends JFrame {
         return new FunkyStatusBar(model);
     }
 
-    class FunkyMenuBar extends JMenuBar implements UndoManagerObserver, ClipboardObserver,TextObserver{
-        JMenuItem itemUndo,itemRedo,itemCopy,itemPaste,itemPasteSpecial,itemCut,itemDeleteSection;
+    class FunkyMenuBar extends JMenuBar implements UndoManagerObserver, ClipboardObserver, TextObserver {
+        JMenuItem itemUndo, itemRedo, itemCopy, itemPaste, itemPasteSpecial, itemCut, itemDeleteSection;
 
         public FunkyMenuBar() {
             model.attachTextObserver(this);
@@ -265,6 +271,40 @@ public class FunkyFrame extends JFrame {
                     });
                 }
             }
+            loadPlugins();
+        }
+
+        void loadPlugins() {
+            JMenu menu = new JMenu("Plugins");
+            System.out.println(pluginDir);
+            final File dir = new File(pluginDir);
+            try {
+
+                for (final File fileEntry : dir.listFiles()) {
+                    if (!fileEntry.getName().endsWith(".class")) continue;
+                    String pluginName = fileEntry.getName().replace(".class", "");
+                   try {
+
+
+                        final Plugin plugin;
+                        plugin = PluginFactory.newInstance(pluginName);
+
+                    JMenuItem item = new JMenuItem(plugin.getName());
+                        menu.add(item);
+                        item.addActionListener(new ActionListener() {
+                            @Override
+                            public void actionPerformed(ActionEvent actionEvent) {
+                                plugin.execute(model, UndoManager.getInstance(), model.getClipboardStack());
+                            }
+                        });
+                     } catch (Exception e) {
+                        System.out.println(String.format("Plugin \"%s\" couldn't be loaded",pluginName));
+                    }
+                }
+            } catch (Exception e) {
+                System.out.println(String.format("Can't access plugin directory"));
+            }
+            add(menu);
         }
 
         @Override
@@ -299,7 +339,7 @@ public class FunkyFrame extends JFrame {
     protected void processKeyEvent(KeyEvent e) {
         super.processKeyEvent(e);
 
-        if(e.getKeyCode() == KeyEvent.VK_ESCAPE){
+        if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
             this.dispose();
             System.exit(0);
         }

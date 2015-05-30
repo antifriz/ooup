@@ -1,4 +1,4 @@
-package hr.fer.zemris.ooup.lab3.model.undomanager;
+package hr.fer.zemris.ooup.lab3.funkyeditor.model.undomanager;
 
 /**
  * Created by ivan on 5/30/15.

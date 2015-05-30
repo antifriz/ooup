@@ -1,9 +1,9 @@
-package hr.fer.zemris.ooup.lab3.components.statusbar;
+package hr.fer.zemris.ooup.lab3.funkyeditor.components.statusbar;
 
-import hr.fer.zemris.ooup.lab3.model.CursorObserver;
-import hr.fer.zemris.ooup.lab3.model.TextEditorModel;
-import hr.fer.zemris.ooup.lab3.model.TextObserver;
-import hr.fer.zemris.ooup.lab3.helpers.Location;
+import hr.fer.zemris.ooup.lab3.funkyeditor.model.CursorObserver;
+import hr.fer.zemris.ooup.lab3.funkyeditor.model.TextEditorModel;
+import hr.fer.zemris.ooup.lab3.funkyeditor.model.TextObserver;
+import hr.fer.zemris.ooup.lab3.funkyeditor.helpers.Location;
 
 import javax.swing.*;
 import javax.swing.border.BevelBorder;

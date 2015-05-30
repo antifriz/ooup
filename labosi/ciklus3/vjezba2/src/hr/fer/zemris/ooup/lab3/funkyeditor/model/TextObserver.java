@@ -1,6 +1,4 @@
-package hr.fer.zemris.ooup.lab3.model;
-
-import hr.fer.zemris.ooup.lab3.helpers.Location;
+package hr.fer.zemris.ooup.lab3.funkyeditor.model;
 
 /**
  * Created by ivan on 5/28/15.

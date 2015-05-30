@@ -1,6 +1,6 @@
-package hr.fer.zemris.ooup.lab3.model.undomanager;
+package hr.fer.zemris.ooup.lab3.funkyeditor.model.undomanager;
 
-import hr.fer.zemris.ooup.lab3.model.EditAction;
+import hr.fer.zemris.ooup.lab3.funkyeditor.model.EditAction;
 
 import java.util.ArrayList;
 import java.util.List;

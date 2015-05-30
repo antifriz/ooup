@@ -1,9 +1,9 @@
-package hr.fer.zemris.ooup.lab3.model;
+package hr.fer.zemris.ooup.lab3.funkyeditor.model;
 
-import hr.fer.zemris.ooup.lab3.helpers.Location;
-import hr.fer.zemris.ooup.lab3.helpers.LocationRange;
-import hr.fer.zemris.ooup.lab3.model.clipboard.ClipboardStack;
-import hr.fer.zemris.ooup.lab3.model.undomanager.UndoManager;
+import hr.fer.zemris.ooup.lab3.funkyeditor.helpers.Location;
+import hr.fer.zemris.ooup.lab3.funkyeditor.helpers.LocationRange;
+import hr.fer.zemris.ooup.lab3.funkyeditor.model.clipboard.ClipboardStack;
+import hr.fer.zemris.ooup.lab3.funkyeditor.model.undomanager.UndoManager;
 
 import java.util.ArrayList;
 import java.util.Iterator;

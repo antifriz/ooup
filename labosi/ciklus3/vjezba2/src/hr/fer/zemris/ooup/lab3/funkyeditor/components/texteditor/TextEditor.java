@@ -1,11 +1,11 @@
-package hr.fer.zemris.ooup.lab3.components.texteditor;
+package hr.fer.zemris.ooup.lab3.funkyeditor.components.texteditor;
 
-import hr.fer.zemris.ooup.lab3.helpers.Location;
-import hr.fer.zemris.ooup.lab3.helpers.LocationRange;
-import hr.fer.zemris.ooup.lab3.model.CursorObserver;
-import hr.fer.zemris.ooup.lab3.model.TextEditorModel;
-import hr.fer.zemris.ooup.lab3.model.TextObserver;
-import hr.fer.zemris.ooup.lab3.model.undomanager.UndoManager;
+import hr.fer.zemris.ooup.lab3.funkyeditor.helpers.Location;
+import hr.fer.zemris.ooup.lab3.funkyeditor.helpers.LocationRange;
+import hr.fer.zemris.ooup.lab3.funkyeditor.model.CursorObserver;
+import hr.fer.zemris.ooup.lab3.funkyeditor.model.TextEditorModel;
+import hr.fer.zemris.ooup.lab3.funkyeditor.model.TextObserver;
+import hr.fer.zemris.ooup.lab3.funkyeditor.model.undomanager.UndoManager;
 
 import javax.swing.*;
 import java.awt.*;

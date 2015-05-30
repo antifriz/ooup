@@ -1,4 +1,4 @@
-package hr.fer.zemris.ooup.lab3.model.clipboard;
+package hr.fer.zemris.ooup.lab3.funkyeditor.model.clipboard;
 
 import java.util.ArrayList;
 import java.util.List;

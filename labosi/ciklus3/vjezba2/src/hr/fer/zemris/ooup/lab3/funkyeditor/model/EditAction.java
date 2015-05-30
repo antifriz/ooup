@@ -1,4 +1,4 @@
-package hr.fer.zemris.ooup.lab3.model;
+package hr.fer.zemris.ooup.lab3.funkyeditor.model;
 
 /**
  * Created by ivan on 5/29/15.

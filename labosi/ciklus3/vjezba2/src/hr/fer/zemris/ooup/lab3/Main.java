@@ -4,7 +4,7 @@
 
 package hr.fer.zemris.ooup.lab3;
 
-import hr.fer.zemris.ooup.lab3.frames.FunkyFrame;
+import hr.fer.zemris.ooup.lab3.funkyeditor.frame.FunkyFrame;
 
 import java.awt.*;
 
