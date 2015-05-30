@@ -406,6 +406,7 @@ public class TextEditorModel {
 
             @Override
             public void executeUndo() {
+                TextEditorModel.this.selectionRange = null;
                 for (int i = 0; i < strInserted.length(); i++)
                     deleteAfter(beforeLocation);
                 TextEditorModel.this.notifyTextObservers();
@@ -447,6 +448,7 @@ public class TextEditorModel {
 
             @Override
             public void executeUndo() {
+                TextEditorModel.this.selectionRange = null;
                 deleteBefore(afterLocation);
                 TextEditorModel.this.notifyTextObservers();
                 TextEditorModel.this.setCursorLocation(beforeLocation);
