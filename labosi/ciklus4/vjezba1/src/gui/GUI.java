@@ -202,6 +202,19 @@ public class GUI extends JFrame implements DocumentModelListener {
                     }
                 });
             }
+            {
+                JButton button = new JButton("Očisti");
+                add(button);
+                button.setFocusable(false);
+                button.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent actionEvent) {
+                        GUI.this.currentState.onLeaving();
+                        GUI.this.currentState = new EraserState(documentModel);
+                        documentModel.clear();
+                    }
+                });
+            }
         }
     }
 

@@ -50,6 +50,9 @@ public class DocumentModel {
     // Brisanje svih objekata iz modela (pazite da se sve potrebno odregistrira)
     // i potom obavijeste svi promatrači modela
     public void clear() {
+        selectedObjects.clear();
+        objects.clear();
+        notifyListeners();
     }
 
     // Dodavanje objekta u dokument (pazite je li već selektiran; registrirajte model kao promatrača)
@@ -232,5 +235,6 @@ public class DocumentModel {
         selectedObjects.clear();
         objects.clear();
         objects.addAll(list);
+        notifyListeners();
     }
 }
