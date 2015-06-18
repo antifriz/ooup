@@ -71,21 +71,7 @@ public abstract class AbstractGraphicalObject implements GraphicalObject {
         };
     }
 
-    @Override
-    public Rectangle getBoundingBox() {
-        int xmin = hotPoints[0].getX();
-        int xmax = hotPoints[0].getX();
-        int ymin = hotPoints[0].getY();
-        int ymax = hotPoints[0].getY();
-        for(Point hp : hotPoints)
-        {
-            xmin = Math.min(xmin,hp.getX());
-            xmax = Math.max(xmax, hp.getX());
-            ymin = Math.min(ymin,hp.getY());
-            ymax = Math.max(ymax, hp.getY());
-        }
-        return new Rectangle(xmin,ymin, xmax-xmin,ymax-ymin);
-    }
+
 
     @Override
     public boolean isHotPointSelected(int index) {
@@ -137,5 +123,11 @@ public abstract class AbstractGraphicalObject implements GraphicalObject {
         for (GraphicalObjectListener l : listeners)
             l.graphicalObjectSelectionChanged(this);
     }
+
+    @Override
+    public double selectionDistance(Point mousePoint) {
+        return getBoundingBox().pointDistance(mousePoint);
+    }
+
 
 }

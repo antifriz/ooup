@@ -1,21 +1,24 @@
 package gui;
 
+import graphicalobjects.CompositeShape;
 import graphicalobjects.GraphicalObject;
 import graphicalobjects.LineSegment;
 import graphicalobjects.Oval;
 import model.document.DocumentModel;
 import model.document.DocumentModelListener;
-import model.document.state.AddShapeState;
-import model.document.state.IdleState;
-import model.document.state.SelectShapeState;
-import model.document.state.State;
+import model.document.state.*;
+import rendering.SVGRendererImpl;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.*;
 import java.util.List;
 
 /**
@@ -28,12 +31,28 @@ public class GUI extends JFrame implements DocumentModelListener {
     Canvas canvas;
     ToolBar toolBar;
 
-    private static final  GraphicalObject[] IMPLEMENTED_OBJECTS = {
+    private static final GraphicalObject[] IMPLEMENTED_OBJECTS = {
             new LineSegment(),
             new Oval()
     };
 
+    private static final Map<String,GraphicalObject> SERIALIZATION_ID_MAP;
+    static {
+        SERIALIZATION_ID_MAP = new HashMap<>();
+        GraphicalObject o = new LineSegment();
+        SERIALIZATION_ID_MAP.put(o.getShapeID(), o);
+        o=new Oval();
+        SERIALIZATION_ID_MAP.put(o.getShapeID(), o);
+        o=new CompositeShape();
+        SERIALIZATION_ID_MAP.put(o.getShapeID(), o);
+    }
+
+
     private State currentState = new IdleState();
+
+    public GUI(){
+        this(new ArrayList<GraphicalObject>());
+    }
 
     public GUI(List<GraphicalObject> objects) {
 
@@ -78,7 +97,6 @@ public class GUI extends JFrame implements DocumentModelListener {
 
     @Override
     public void documentChange() {
-        System.out.println("DocumentChanged");
         toolBar.repaint();
         canvas.repaint();
     }
@@ -89,19 +107,74 @@ public class GUI extends JFrame implements DocumentModelListener {
 
     public class ToolBar extends JToolBar {
 
-        HashMap<String,JButton> buttonCreatorsMap = new HashMap<>();
+        HashMap<String, JButton> buttonCreatorsMap = new HashMap<>();
 
         public ToolBar() {
-
-            for(final GraphicalObject go : IMPLEMENTED_OBJECTS)
             {
+                JButton button = new JButton("Učitaj");
+                add(button);
+                button.setFocusable(false);
+                button.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent actionEvent) {
+                        JFileChooser c = new JFileChooser();
+                        int rVal = c.showOpenDialog(GUI.this);
+                        if (rVal == JFileChooser.APPROVE_OPTION) {
+                            try {
+                                loadFile(Paths.get(c.getCurrentDirectory().toString(),c.getSelectedFile().getName()).toString());
+                            } catch (IOException e) {
+                                JOptionPane.showMessageDialog(null, "Unable to load file");
+                            }
+                        }
+                    }
+                });
+            }
+            {
+                JButton button = new JButton("Pohrani");
+                add(button);
+                button.setFocusable(false);
+                button.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent actionEvent) {
+                        JFileChooser c = new JFileChooser();
+                        int rVal = c.showOpenDialog(GUI.this);
+                        if (rVal == JFileChooser.APPROVE_OPTION) {
+                            try {
+                                saveFile(Paths.get(c.getCurrentDirectory().toString(),c.getSelectedFile().getName()).toString());
+                            } catch (IOException e) {
+                                JOptionPane.showMessageDialog(null, "Unable to save file");
+                            }
+                        }
+                    }
+                });
+            }
+            {
+                JButton button = new JButton("SVG Export");
+                add(button);
+                button.setFocusable(false);
+                button.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent actionEvent) {
+                        JFileChooser c = new JFileChooser();
+                        int rVal = c.showOpenDialog(GUI.this);
+                        if (rVal == JFileChooser.APPROVE_OPTION) {
+                            try {
+                                SVGexport(Paths.get(c.getCurrentDirectory().toString(), c.getSelectedFile().getName()).toString());
+                            } catch (IOException e) {
+                                JOptionPane.showMessageDialog(null, "Unable to export file");
+                            }
+                        }
+                    }
+                });
+            }
+            for (final GraphicalObject go : IMPLEMENTED_OBJECTS) {
                 JButton button = new JButton(go.getShapeName());
                 add(button);
                 button.setFocusable(false);
                 button.addActionListener(new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent actionEvent) {
-                        GUI.this.currentState = new AddShapeState(documentModel,go);
+                        GUI.this.currentState = new AddShapeState(documentModel, go);
                     }
                 });
             }
@@ -112,10 +185,50 @@ public class GUI extends JFrame implements DocumentModelListener {
                 button.addActionListener(new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent actionEvent) {
+                        GUI.this.currentState.onLeaving();
                         GUI.this.currentState = new SelectShapeState(documentModel);
                     }
                 });
             }
+            {
+                JButton button = new JButton("Brisalo");
+                add(button);
+                button.setFocusable(false);
+                button.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent actionEvent) {
+                        GUI.this.currentState.onLeaving();
+                        GUI.this.currentState = new EraserState(documentModel);
+                    }
+                });
+            }
         }
+    }
+
+    private void SVGexport(String path) throws IOException {
+        SVGRendererImpl r = new SVGRendererImpl(path);
+        for (GraphicalObject o : documentModel.getAllObjects())
+            o.render(r);
+        r.close();
+    }
+
+    private void saveFile(String path) throws IOException{
+        List<String> lines = new ArrayList<>();
+        for (GraphicalObject o: documentModel.getAllObjects())
+            o.save(lines);
+        Files.write(Paths.get(path), lines, Charset.defaultCharset());
+    }
+
+    private void loadFile(String path) throws IOException{
+        List<String> lines = Files.readAllLines(Paths.get(path), Charset.defaultCharset());
+        Stack<GraphicalObject> stack = new Stack<>();
+
+        for (String line:lines)
+        {
+            String[] parts =line.split(" ",2);
+            SERIALIZATION_ID_MAP.get(parts[0]).load(stack,parts[1]);
+        }
+
+        documentModel.setGraphicalObjects(stack);
     }
 }

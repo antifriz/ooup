@@ -1,3 +1,6 @@
+import geometry.*;
+import geometry.Point;
+import graphicalobjects.CompositeShape;
 import graphicalobjects.GraphicalObject;
 import graphicalobjects.LineSegment;
 import graphicalobjects.Oval;
@@ -12,12 +15,12 @@ import java.util.List;
  */
 public class Main {
     public static void main(String[] args) {
-        List<GraphicalObject> objects = new ArrayList<>();
+//        CompositeShape cs = new CompositeShape();
+//        cs.add(new LineSegment(new Point[]{new Point(100,110),new Point(200,210)}));
+//        cs.add(new LineSegment(new Point[]{new Point(150,110),new Point(250,210)}));
+//        objects.add(cs);
 
-        objects.add(new LineSegment());
-        objects.add(new Oval());
-
-        GUI gui = new GUI(objects);
+        GUI gui = new GUI();
         gui.setBounds(100, 100, 500, 400);
         gui.setVisible(true);
 

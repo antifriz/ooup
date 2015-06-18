@@ -18,7 +18,10 @@ public class G2DRendererImpl implements Renderer {
     @Override
     public void drawLine(Point s, Point e) {
         g2d.setColor(Color.blue);
+        Stroke tmp =g2d.getStroke();
+        g2d.setStroke(new BasicStroke(2));
         g2d.drawLine(s.getX(),s.getY(),e.getX(),e.getY());
+        g2d.setStroke(tmp);
     }
 
     @Override
@@ -37,7 +40,7 @@ public class G2DRendererImpl implements Renderer {
         g2d.fillPolygon(xs, ys, points.length);
         g2d.setColor(Color.red);
         Stroke tmp =g2d.getStroke();
-        g2d.setStroke(new BasicStroke(3));
+        g2d.setStroke(new BasicStroke(2));
         g2d.drawPolygon(xs,ys,points.length);
         g2d.setStroke(tmp);
 

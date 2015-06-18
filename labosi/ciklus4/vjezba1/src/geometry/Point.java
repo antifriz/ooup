@@ -3,7 +3,7 @@ package geometry;
 /**
  * Created by ivan on 6/16/15.
  */
-public class Point {
+public class Point implements Cloneable{
 
     private int x;
     private int y;
@@ -11,6 +11,11 @@ public class Point {
     public Point(int x, int y) {
         this.x = x;
         this.y = y;
+    }
+
+    public Point(Point p) {
+        this.x = p.x;
+        this.y = p.y;
     }
 
     public int getX() {

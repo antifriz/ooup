@@ -25,7 +25,6 @@ public class Canvas extends JComponent implements KeyListener,MouseListener, Mou
 
     @Override
     protected void paintComponent(Graphics g) {
-        System.out.println("Painting");
         Graphics2D g2d = (Graphics2D) g;
         Renderer r = new G2DRendererImpl(g2d);
 

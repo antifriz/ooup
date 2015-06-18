@@ -2,6 +2,7 @@ package model.document;
 
 import geometry.GeometryUtil;
 import geometry.Point;
+import graphicalobjects.CompositeShape;
 import graphicalobjects.GraphicalObject;
 import graphicalobjects.GraphicalObjectListener;
 
@@ -14,7 +15,7 @@ import java.util.*;
  */
 public class DocumentModel {
 
-    public final static double SELECTION_PROXIMITY = 20;
+    public final static double SELECTION_PROXIMITY = 10;
 
     // Kolekcija svih grafičkih objekata:
     private List<GraphicalObject> objects = new ArrayList<>();
@@ -57,7 +58,6 @@ public class DocumentModel {
         if (obj.isSelected())
             selectedObjects.add(obj);
         obj.addGraphicalObjectListener(goListener);
-        System.out.println("added, now:"+objects.size());
         notifyListeners();
     }
 
@@ -89,6 +89,37 @@ public class DocumentModel {
         GraphicalObject go =findSelectedGraphicalObject(mousePoint);
         if(go!=null)
             selectObject(go,deselectOthers);
+    }
+
+    public void groupSelectedObjects(){
+        CompositeShape cs = new CompositeShape();
+        cs.setSelected(true);
+        for(GraphicalObject go :selectedObjects){
+            cs.add(go);
+            go.setSelected(true);
+            objects.remove(go);
+        }
+        selectObject(cs, true);
+        objects.add(cs);
+        notifyListeners();
+    }
+
+    public void ungroupSelectedObjects(){
+        List<CompositeShape> csList = new ArrayList<>();
+        for (GraphicalObject co: selectedObjects){
+            if(co instanceof CompositeShape)
+                csList.add((CompositeShape)co);
+        }
+        for(CompositeShape cs : csList){
+            selectedObjects.remove(cs);
+            objects.remove(cs);
+            for(GraphicalObject go : cs.getComponents())
+            {
+                selectedObjects.add(go);
+                objects.add(go);
+            }
+        }
+        notifyListeners();
     }
 
     // Vrati nepromjenjivu listu postojećih objekata (izmjene smiju ići samo kroz metode modela)
@@ -128,31 +159,15 @@ public class DocumentModel {
     public void increaseZ(GraphicalObject go) {
         int idx = objects.indexOf(go);
         if(idx+1<objects.size())
-        {
-            System.out.println("incre");
-            for(GraphicalObject o : objects)
-                System.out.println(o.getShapeName());
-            System.out.println(idx+" "+(idx+1));
-
             Collections.swap(objects, idx, idx + 1);
-            for(GraphicalObject o : objects)
-                System.out.println(o.getShapeName());
-        }
         notifyListeners();
     }
 
     // Pomakni predani objekt u listi objekata na jedno mjesto ranije...
     public void decreaseZ(GraphicalObject go) {
         int idx = objects.indexOf(go);
-        if(0<=idx-1){
-            System.out.println("decre");
-            for(GraphicalObject o : objects)
-                System.out.println(o.getShapeName());
-            System.out.println(idx+" "+(idx-1));
+        if(0<=idx-1)
             Collections.swap(objects,idx-1,idx);
-            for(GraphicalObject o : objects)
-                System.out.println(o.getShapeName());
-        }
         notifyListeners();
     }
 
@@ -165,17 +180,11 @@ public class DocumentModel {
         double proximity = Double.MAX_VALUE;
 
         for (GraphicalObject o : objects) {
-            double tmpProximity = Double.MAX_VALUE;
-            if(o.getBoundingBox().isPointInside(mousePoint))
-                return o;
-            Iterator<Point> it = o.getHotPointsIterator();
-            while (it.hasNext())
+            double tmpProximity = o.selectionDistance(mousePoint);
+            if(tmpProximity<proximity && tmpProximity< SELECTION_PROXIMITY)
             {
-                double dist =GeometryUtil.distanceFromPoint(it.next(),mousePoint);
-                if(dist<SELECTION_PROXIMITY && dist<proximity) {
-                    proximity = tmpProximity;
-                    go = o;
-                }
+                proximity = tmpProximity;
+                go = o;
             }
         }
         return go;
@@ -198,7 +207,6 @@ public class DocumentModel {
         for (int i = 0; i < object.getNumberOfHotPoints(); i++) {
 
             //if (object.isHotPointSelected(i)) {
-                System.out.println("From: "+ i+" to: "+mousePoint);
                 double dist = object.getHotPointDistance(i, mousePoint);
                 if (dist <= SELECTION_PROXIMITY && dist < proximity) {
                     idx = i;
@@ -209,4 +217,20 @@ public class DocumentModel {
         return idx;
     }
 
+    public void erase(List<Point> eraserPath) {
+        for (Point p : eraserPath)
+        {
+            GraphicalObject go = findSelectedGraphicalObject(p);
+            if(go==null) continue;
+            selectedObjects.remove(go);
+            objects.remove(go);
+        }
+        notifyListeners();
+    }
+
+    public void setGraphicalObjects(List<GraphicalObject> list) {
+        selectedObjects.clear();
+        objects.clear();
+        objects.addAll(list);
+    }
 }

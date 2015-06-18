@@ -25,6 +25,12 @@ public class GeometryUtil {
         double startDistance = distanceFromPoint(s,p);
         double endDistance = distanceFromPoint(e,p);
 
-        return Math.min(lineDistance,Math.min(startDistance,endDistance));
+        double lineLength = distanceFromPoint(s,e);
+        double startLineDistance = Math.sqrt(startDistance * startDistance - lineDistance * lineDistance);
+        double endLineDistance = Math.sqrt(endDistance*endDistance - lineDistance*lineDistance);
+        if(Math.abs(startDistance+endLineDistance-lineLength) <=Math.pow(10,-2))
+            return lineDistance;
+
+        return Math.min(startDistance,endDistance);
     }
 }

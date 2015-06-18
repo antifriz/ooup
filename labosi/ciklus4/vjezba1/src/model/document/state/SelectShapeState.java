@@ -70,14 +70,20 @@ public final class SelectShapeState implements State {
                 for (GraphicalObject go: documentModel.getSelectedObjects())
                     go.translate(new Point(1,0));
                 break;
-            case KeyEvent.VK_ADD:
-                System.out.println("PLIUUUUUS");
+            case KeyEvent.VK_EQUALS:
+                if(!ke.isShiftDown()) break;
                 for (GraphicalObject go: documentModel.getSelectedObjects())
                     documentModel.increaseZ(go);
                 break;
             case KeyEvent.VK_MINUS:
                 for (GraphicalObject go: documentModel.getSelectedObjects())
                     documentModel.decreaseZ(go);
+                break;
+            case KeyEvent.VK_G:
+                documentModel.groupSelectedObjects();
+                break;
+            case KeyEvent.VK_U:
+                documentModel.ungroupSelectedObjects();
                 break;
             default:
                 break;
@@ -121,5 +127,6 @@ public final class SelectShapeState implements State {
     @Override
     public void onLeaving() {
         documentModel.deselectAll();
+        documentModel.notifyListeners();
     }
 }

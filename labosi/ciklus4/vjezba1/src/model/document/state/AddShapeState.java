@@ -25,7 +25,6 @@ public final class AddShapeState implements State {
     public void mouseDown(Point mousePoint, boolean shiftDown, boolean ctrlDown) {
         GraphicalObject go =  prototype.duplicate();
         go.translate(mousePoint);
-        System.out.println("Žigosanje @ "+mousePoint);
         model.addGraphicalObject(go);
     }
 
